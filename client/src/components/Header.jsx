@@ -1,4 +1,6 @@
 import React from "react";
+import logo from "../assets/logo.png";
+import mingo from "../assets/logo2.png";
 
 const Header = () => {  
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -12,11 +14,11 @@ const Header = () => {
             {/* Logo */}
             <a href="#" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                <span className="text-xl leading-none">💬</span>
+                <span className="text-xl leading-none"><img src={logo} alt="Logo" /></span>
               </div>
 
               <span className="text-2xl font-bold tracking-tight">
-                mingo<span className="text-violet-400">.</span>
+                mingo<span className="text-violet-400"><img src={mingo} alt="" /></span>
               </span>
             </a>
 
