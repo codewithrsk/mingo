@@ -2,6 +2,7 @@ import React from "react";
 import logo from "../assets/logo.png";
 import mingo from "../assets/logo2.png";
 import { useNavigate } from "react-router-dom";
+import api from "../config/Api.config";
 
 const themes = [
   { value: "light", label: "☀️ Light" },
@@ -55,8 +56,9 @@ const Header = () => {
     navigate("/register");
   };
 
-  const handleHome = () => {
+  const handleHome = async() => {
     closeMenu();
+    const req= await api.get("/")
     navigate("/");
   };
 

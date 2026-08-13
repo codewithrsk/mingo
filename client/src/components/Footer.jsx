@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom";
 import {
   FaFacebookF,
   FaInstagram,
@@ -6,6 +7,8 @@ import {
   FaDiscord,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import logo from "../assets/logo.png";
+import logo2 from "../assets/logo2.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -21,20 +24,62 @@ const Footer = () => {
           <div className="lg:col-span-1">
 
             {/* Logo */}
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-flex items-center gap-3 group"
             >
-              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-200">
-                <span className="text-xl font-bold text-primary-content">
-                  M
-                </span>
-              </div>
-
-              <span className="text-2xl font-bold tracking-tight">
-                Mingo
-              </span>
-            </a>
+              <div
+                            className="
+                              flex
+                              items-center
+                              justify-center
+                              h-[6vh]
+                              w-[6vh]
+                              min-h-9
+                              min-w-9
+                              max-h-12
+                              max-w-12
+                              rounded-xl
+                              bg-primary
+                              shadow-lg
+                              shadow-primary/30
+                              transition-transform
+                              duration-200
+                              hover:scale-105
+                            "
+                          >
+                            <img
+                              src={logo}
+                              alt="Mingo Logo"
+                              className="
+                                w-[70%]
+                                h-[70%]
+                                object-contain
+                              "
+                            />
+                          </div>
+              
+                          {/* Mingo Text Logo */}
+                          <div
+                            className="
+                              h-[5vh]
+                              max-h-10
+                              flex
+                              items-center
+                            "
+                          >
+                            <img
+                              src={logo2}
+                              alt="Mingo"
+                              className="
+                                h-full
+                                w-auto
+                                max-w-32
+                                object-contain
+                              "
+                            />
+                          </div>
+            </Link>
 
             {/* Description */}
             <p className="mt-5 text-sm leading-6 text-base-content/70 max-w-xs">
@@ -46,49 +91,49 @@ const Footer = () => {
             <div className="flex items-center gap-2 mt-6">
 
               {/* Facebook */}
-              <a
-                href="#"
+              <Link
+                to="#"
                 aria-label="Facebook"
                 className="btn btn-circle btn-ghost !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
               >
                 <FaFacebookF size={17} />
-              </a>
+              </Link>
 
               {/* Instagram */}
-              <a
-                href="#"
+              <Link
+                to="#"
                 aria-label="Instagram"
                 className="btn btn-circle btn-ghost !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
               >
                 <FaInstagram size={18} />
-              </a>
+              </Link>
 
               {/* X */}
-              <a
-                href="#"
+              <Link
+                to="#"
                 aria-label="X"
                 className="btn btn-circle btn-ghost !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
               >
                 <FaXTwitter size={17} />
-              </a>
+              </Link>
 
               {/* GitHub */}
-              <a
-                href="#"
+              <Link
+                to="#"
                 aria-label="GitHub"
                 className="btn btn-circle btn-ghost !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
               >
                 <FaGithub size={18} />
-              </a>
+              </Link>
 
               {/* Discord */}
-              <a
-                href="#"
+              <Link
+                to="#"
                 aria-label="Discord"
                 className="btn btn-circle btn-active !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
               >
                 <FaDiscord size={19} />
-              </a>
+              </Link>
 
             </div>
           </div>
@@ -102,39 +147,39 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Features
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Messaging
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Groups
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Notifications
-                </a>
+                </Link>
               </li>
 
             </ul>
@@ -149,39 +194,39 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   About Us
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Careers
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Blog
-                </a>
+                </Link>
               </li>
 
             </ul>
@@ -196,39 +241,39 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Cookie Policy
-                </a>
+                </Link>
               </li>
 
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="#"
                   className="text-base-content/65 hover:text-primary transition-colors duration-200"
                 >
                   Security
-                </a>
+                </Link>
               </li>
 
             </ul>
