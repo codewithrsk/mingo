@@ -1,8 +1,7 @@
 import React from "react";
 import logo from "../assets/logo.png";
 import mingo from "../assets/logo2.png";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 const themes = [
   { value: "light", label: "☀️ Light" },
@@ -25,7 +24,7 @@ const themes = [
 ];
 
 const Header = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = React.useState(false);
 
@@ -46,10 +45,25 @@ const Header = () => {
     setMenuOpen(false);
   };
 
+  const handleLogin = () => {
+    closeMenu();
+    navigate("/login");
+  };
+
+  const handleRegister = () => {
+    closeMenu();
+    navigate("/register");
+  };
+
+  const handleHome = () => {
+    closeMenu();
+    navigate("/");
+  };
+
   return (
     <nav
       className="
-        fixed
+        sticky
         top-0
         left-0
         right-0
@@ -68,12 +82,12 @@ const Header = () => {
 
           {/* ================= LOGO ================= */}
 
-          <a
-            href="#"
-            onClick={closeMenu}
-            className="flex items-center gap-2 sm:gap-3 h-full"
+          <button
+            type="button"
+            onClick={handleHome}
+            className="flex items-center gap-2 sm:gap-3 h-full cursor-pointer"
           >
-            {/* Icon */}
+            {/* Logo Icon */}
             <div
               className="
                 flex
@@ -105,7 +119,7 @@ const Header = () => {
               />
             </div>
 
-            {/* Mingo */}
+            {/* Mingo Text Logo */}
             <div
               className="
                 h-[5vh]
@@ -125,7 +139,7 @@ const Header = () => {
                 "
               />
             </div>
-          </a>
+          </button>
 
           {/* ================= DESKTOP NAV ================= */}
 
@@ -185,8 +199,7 @@ const Header = () => {
 
           <div className="hidden md:flex items-center gap-2">
 
-            {/* Theme */}
-
+            {/* Theme Selector */}
             <div
               className="
                 relative
@@ -227,10 +240,11 @@ const Header = () => {
               </select>
             </div>
 
-            {/* Login */}
+            {/* ================= LOGIN ================= */}
 
             <button
               type="button"
+              onClick={handleLogin}
               className="
                 btn
                 btn-sm
@@ -248,10 +262,11 @@ const Header = () => {
               Log in
             </button>
 
-            {/* Get Started */}
+            {/* ================= REGISTER ================= */}
 
             <button
               type="button"
+              onClick={handleRegister}
               className="
                 btn
                 btn-primary
@@ -264,7 +279,6 @@ const Header = () => {
                 hover:scale-[1.02]
                 transition-all
               "
-              onClick={navigate("/Register")}
             >
               Get Started
             </button>
@@ -318,7 +332,7 @@ const Header = () => {
           >
             <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5">
 
-              {/* Links */}
+              {/* Mobile Links */}
 
               <div className="flex flex-col gap-1">
 
@@ -371,7 +385,7 @@ const Header = () => {
 
               <div className="divider opacity-20"></div>
 
-              {/* Mobile Theme */}
+              {/* ================= MOBILE THEME ================= */}
 
               <div className="mb-4">
 
@@ -417,12 +431,14 @@ const Header = () => {
 
               </div>
 
-              {/* Mobile Actions */}
+              {/* ================= MOBILE ACTIONS ================= */}
 
               <div className="flex flex-col sm:flex-row gap-2">
 
+                {/* Login */}
                 <button
                   type="button"
+                  onClick={handleLogin}
                   className="
                     btn
                     flex-1
@@ -437,8 +453,10 @@ const Header = () => {
                   Log in
                 </button>
 
+                {/* Register */}
                 <button
                   type="button"
+                  onClick={handleRegister}
                   className="
                     btn
                     btn-primary
