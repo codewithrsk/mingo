@@ -2,11 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import mingo from "../assets/logo2.png";
+import api from "../config/Api.config";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
 
+  const { setUser, setIsLogin, setRole } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,16 +29,51 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Login Data:", formData);
+    if (loading) return;
 
-    // Add your API login logic here
-    // After successful login:
-    // navigate("/");
+    setLoading(true);
 
-    navigate("/");
+    try {
+      const res = await api.post("/auth/login", formData);
+
+      console.log("Login Response:", res.data);
+
+      const userData = res.data.data;
+      sessionStorage.setItem("mingo", JSON.stringify(userData));
+
+      // Save user
+      //   if (formData.remember) {
+      //     localStorage.setItem("mingo", JSON.stringify(userData));
+      //   } else {
+      //     sessionStorage.setItem("mingo", JSON.stringify(userData));
+      //   }
+
+      // Update AuthContext
+      setUser(userData);
+      setIsLogin(true);
+
+      // Set role if available
+      if (userData?.role) {
+        setRole(userData.role);
+      }
+
+      toast.success(res.data.message || "Login successful!");
+
+      // Navigate only after successful login
+      navigate("/");
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Login failed. Please check your email and password.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,10 +114,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="label text-sm font-medium"
-                >
+                <label htmlFor="email" className="label text-sm font-medium">
                   Email address
                 </label>
 
@@ -151,16 +190,22 @@ const Login = () => {
               {/* Login Button */}
               <button
                 type="submit"
+                disabled={loading}
                 className="btn btn-primary w-full"
               >
-                Sign in
+                {loading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </button>
             </form>
 
             {/* Divider */}
-            <div className="divider text-xs text-base-content/40">
-              OR
-            </div>
+            <div className="divider text-xs text-base-content/40">OR</div>
 
             {/* Register */}
             <p className="text-center text-sm text-base-content/60">
@@ -178,17 +223,11 @@ const Login = () => {
         {/* Footer */}
         <p className="text-center text-xs text-base-content/50 mt-6">
           By continuing, you agree to Mingo's{" "}
-          <Link
-            to="/terms"
-            className="hover:text-primary hover:underline"
-          >
+          <Link to="/terms" className="hover:text-primary hover:underline">
             Terms
           </Link>{" "}
           and{" "}
-          <Link
-            to="/privacy"
-            className="hover:text-primary hover:underline"
-          >
+          <Link to="/privacy" className="hover:text-primary hover:underline">
             Privacy Policy
           </Link>
           .

@@ -10,6 +10,7 @@ import {
   FaLock,
   FaBolt,
 } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 import logo from "../assets/logo2.png";
 import api from "../config/Api.config";
@@ -306,6 +307,9 @@ const Register = () => {
         response.data?.message ||
           "Account created successfully!"
       );
+      toast.success(response.data?.message || "Account created successfully!");
+      sessionStorage.setItem("mingo", JSON.stringify(response.data.data));
+
 
       // Redirect to login
       setTimeout(() => {

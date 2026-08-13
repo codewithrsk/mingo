@@ -87,7 +87,7 @@ export const LoginUser = async (req, res, next) => {
       return next(error);
     }
 
-    await genToken(existingUser, res);
+    // await genToken(existingUser, res);
 
     res.status(200).json({
       message: "Welcome Back",
@@ -101,7 +101,7 @@ export const LoginUser = async (req, res, next) => {
 
 export const LogoutUser = async (req, res, next) => {
   try {
-    res.clearCookie("Oreo", { maxAge: 0 });
+    // res.clearCookie("Oreo", { maxAge: 0 });
 
     res.status(200).json({ message: "Logout Sucessfully" });
   } catch (error) {

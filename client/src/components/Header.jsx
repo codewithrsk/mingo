@@ -3,6 +3,8 @@ import logo from "../assets/logo.png";
 import mingo from "../assets/logo2.png";
 import { useNavigate } from "react-router-dom";
 import api from "../config/Api.config";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const themes = [
   { value: "light", label: "☀️ Light" },
@@ -27,24 +29,45 @@ const themes = [
 const Header = () => {
   const navigate = useNavigate();
 
+  const { isLogin, user, logout, setIsLogin, setUser, setRole } = useAuth();
+
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [themeOpen, setThemeOpen] = React.useState(false);
 
   const [theme, setTheme] = React.useState(() => {
     return localStorage.getItem("mingo-theme") || "dark";
   });
+
+  // ============================================================
+  // APPLY THEME
+  // ============================================================
 
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("mingo-theme", theme);
   }, [theme]);
 
-  const handleChangeTheme = (e) => {
-    setTheme(e.target.value);
-  };
+  // ============================================================
+  // CLOSE MENU
+  // ============================================================
 
   const closeMenu = () => {
     setMenuOpen(false);
+    setThemeOpen(false);
   };
+
+  // ============================================================
+  // THEME
+  // ============================================================
+
+  const handleChangeTheme = (newTheme) => {
+    setTheme(newTheme);
+    setThemeOpen(false);
+  };
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
 
   const handleLogin = () => {
     closeMenu();
@@ -56,11 +79,83 @@ const Header = () => {
     navigate("/register");
   };
 
-  const handleHome = async() => {
+  const handleProfile = () => {
     closeMenu();
-    const req= await api.get("/")
+    navigate("/profile");
+  };
+
+  const handleHome = async () => {
+    closeMenu();
+
+    try {
+      await api.get("/");
+    } catch (error) {
+      console.log(error);
+    }
+
     navigate("/");
   };
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+
+  const handleLogout = async () => {
+    try {
+      const res = await api.get("/auth/logout");
+      toast.success(res.data.message);
+
+      sessionStorage.removeItem("mingo");
+
+      setUser(null);
+
+      setIsLogin(false);
+
+      setRole(null);
+
+      navigate("/");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Unknown error occurred during Logout. Please try again.",
+      );
+    }
+  };
+
+  // const handleLogout = async () => {
+  //   try {
+  //     closeMenu();
+
+  //     await logout();
+
+  //     navigate("/login");
+  //   } catch (error) {
+  //     console.error("Logout error:", error);
+  //   }
+  // };
+
+  // ============================================================
+  // USER DATA
+  // ============================================================
+
+  const userName = user?.fullName || user?.name || user?.username || "User";
+
+  const userEmail = user?.email || "";
+
+  const userInitials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((name) => name.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  // ============================================================
+  // SELECTED THEME
+  // ============================================================
+
+  const selectedTheme =
+    themes.find((item) => item.value === theme) || themes[1];
 
   return (
     <nav
@@ -78,18 +173,27 @@ const Header = () => {
         text-base-content
       "
     >
-      <div className="w-full max-w-7xl mx-auto px-5 sm:px-8 h-full">
-
+      {/* Reduced X padding */}
+      <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4 h-full">
         <div className="flex items-center justify-between h-full">
-
-          {/* ================= LOGO ================= */}
+          {/* =====================================================
+              LOGO
+          ====================================================== */}
 
           <button
             type="button"
             onClick={handleHome}
-            className="flex items-center gap-2 sm:gap-3 h-full cursor-pointer"
+            className="
+              flex
+              items-center
+              gap-2
+              h-full
+              cursor-pointer
+              shrink-0
+            "
           >
             {/* Logo Icon */}
+
             <div
               className="
                 flex
@@ -121,7 +225,8 @@ const Header = () => {
               />
             </div>
 
-            {/* Mingo Text Logo */}
+            {/* Mingo Text */}
+
             <div
               className="
                 h-[5vh]
@@ -136,28 +241,28 @@ const Header = () => {
                 className="
                   h-full
                   w-auto
-                  max-w-32
+                  max-w-28
                   object-contain
                 "
               />
             </div>
           </button>
 
-          {/* ================= DESKTOP NAV ================= */}
+          {/* =====================================================
+              DESKTOP NAV
+          ====================================================== */}
 
-          <div className="hidden md:flex items-center gap-1">
-
+          <div className="hidden md:flex items-center gap-0.5">
             <a
               href="#features"
               className="
-                px-4
+                px-3
                 py-2
                 rounded-lg
                 text-base-content
                 font-medium
                 hover:bg-base-content/10
                 transition-all
-                duration-200
               "
             >
               Features
@@ -166,14 +271,13 @@ const Header = () => {
             <a
               href="#preview"
               className="
-                px-4
+                px-3
                 py-2
                 rounded-lg
                 text-base-content
                 font-medium
                 hover:bg-base-content/10
                 transition-all
-                duration-200
               "
             >
               Preview
@@ -182,116 +286,280 @@ const Header = () => {
             <a
               href="#about"
               className="
-                px-4
+                px-3
                 py-2
                 rounded-lg
                 text-base-content
                 font-medium
                 hover:bg-base-content/10
                 transition-all
-                duration-200
               "
             >
               About
             </a>
-
           </div>
 
-          {/* ================= DESKTOP ACTIONS ================= */}
+          {/* =====================================================
+              DESKTOP ACTIONS
+          ====================================================== */}
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-1.5">
+            {/* =================================================
+                THEME DROPDOWN
+            ================================================== */}
 
-            {/* Theme Selector */}
-            <div
-              className="
-                relative
-                flex
-                items-center
-                rounded-xl
-                border
-                border-primary
-                bg-base-100
-                overflow-hidden
-              "
-            >
-              <select
-                value={theme}
-                onChange={handleChangeTheme}
-                aria-label="Select theme"
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setThemeOpen(!themeOpen)}
                 className="
-                  select
-                  select-sm
-                  w-48
-                  bg-transparent
+                  flex
+                  items-center
+                  gap-2
+                  h-9
+                  px-2.5
+                  min-w-40
+                  rounded-lg
+                  border
+                  border-primary
+                  bg-base-100
                   text-base-content
                   font-semibold
-                  border-none
-                  outline-none
-                  focus:outline-none
-                  cursor-pointer
+                  hover:bg-base-content/5
+                  transition-all
                 "
               >
-                {themes.map((item) => (
-                  <option
-                    key={item.value}
-                    value={item.value}
-                  >
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+                <span className="text-base">
+                  {selectedTheme.label.split(" ")[0]}
+                </span>
+
+                <span className="flex-1 text-left truncate text-sm">
+                  {selectedTheme.label.substring(2)}
+                </span>
+
+                <span
+                  className={`
+                    text-[10px]
+                    transition-transform
+                    duration-200
+                    ${themeOpen ? "rotate-180" : ""}
+                  `}
+                >
+                  ▼
+                </span>
+              </button>
+
+              {/* Theme Menu */}
+
+              {themeOpen && (
+                <div
+                  className="
+                    absolute
+                    right-0
+                    top-11
+                    z-[100]
+                    w-56
+                    max-h-80
+                    overflow-y-auto
+                    rounded-xl
+                    border
+                    border-base-content/10
+                    bg-base-100
+                    text-base-content
+                    shadow-2xl
+                    p-2
+                  "
+                >
+                  {themes.map((item) => {
+                    const isSelected = theme === item.value;
+
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => handleChangeTheme(item.value)}
+                        className={`
+                          w-full
+                          flex
+                          items-center
+                          gap-3
+                          px-3
+                          py-2
+                          rounded-lg
+                          text-left
+                          transition-all
+                          ${
+                            isSelected
+                              ? "bg-primary text-primary-content"
+                              : "hover:bg-base-content/10"
+                          }
+                        `}
+                      >
+                        <span className="text-base">
+                          {item.label.split(" ")[0]}
+                        </span>
+
+                        <span className="flex-1 font-medium text-sm">
+                          {item.label.substring(2)}
+                        </span>
+
+                        {isSelected && <span className="font-bold">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* ================= LOGIN ================= */}
+            {/* =================================================
+                LOGGED IN USER
+            ================================================== */}
 
-            <button
-              type="button"
-              onClick={handleLogin}
-              className="
-                btn
-                btn-sm
-                min-w-20
-                bg-base-content/10
-                text-base-content
-                border
-                border-base-content/10
-                font-semibold
-                hover:bg-base-content/20
-                hover:border-base-content/20
-                transition-all
-              "
-            >
-              Log in
-            </button>
+            {isLogin ? (
+              <>
+                {/* User Profile */}
 
-            {/* ================= REGISTER ================= */}
+                <button
+                  type="button"
+                  onClick={handleProfile}
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    px-2
+                    py-1
+                    rounded-lg
+                    bg-base-content/5
+                    border
+                    border-base-content/10
+                    hover:bg-base-content/10
+                    transition-all
+                  "
+                >
+                  {/* Avatar */}
 
-            <button
-              type="button"
-              onClick={handleRegister}
-              className="
-                btn
-                btn-primary
-                btn-sm
-                rounded-xl
-                px-5
-                font-semibold
-                shadow-lg
-                shadow-primary/20
-                hover:scale-[1.02]
-                transition-all
-              "
-            >
-              Get Started
-            </button>
+                  <div
+                    className="
+                      w-8
+                      h-8
+                      rounded-full
+                      bg-primary
+                      text-primary-content
+                      flex
+                      items-center
+                      justify-center
+                      font-bold
+                      text-xs
+                      uppercase
+                      shrink-0
+                    "
+                  >
+                    {userInitials}
+                  </div>
 
+                  {/* User Details */}
+
+                  <div className="text-left max-w-28">
+                    <p className="font-semibold text-sm truncate">{userName}</p>
+
+                    {userEmail && (
+                      <p className="text-[10px] opacity-60 truncate">
+                        {userEmail}
+                      </p>
+                    )}
+                  </div>
+                </button>
+
+                {/* =================================================
+                    LOGOUT BUTTON
+                ================================================== */}
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="
+                    btn
+                    btn-sm
+                    h-9
+                    min-h-9
+                    px-3
+                    rounded-lg
+                    bg-error/10
+                    text-error
+                    border
+                    border-error/20
+                    hover:bg-error
+                    hover:text-error-content
+                    transition-all
+                  "
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                {/* =================================================
+                    LOGIN
+                ================================================== */}
+
+                <button
+                  type="button"
+                  onClick={handleLogin}
+                  className="
+                    btn
+                    btn-sm
+                    h-9
+                    min-h-9
+                    px-3
+                    bg-base-content/10
+                    text-base-content
+                    border
+                    border-base-content/10
+                    font-semibold
+                    hover:bg-base-content/20
+                  "
+                >
+                  Log in
+                </button>
+
+                {/* =================================================
+                    GET STARTED
+                ================================================== */}
+
+                <button
+                  type="button"
+                  onClick={handleRegister}
+                  className="
+                    btn
+                    btn-primary
+                    btn-sm
+                    h-9
+                    min-h-9
+                    rounded-lg
+                    px-4
+                    font-semibold
+                    shadow-lg
+                    shadow-primary/20
+                    hover:scale-[1.02]
+                    transition-all
+                  "
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
 
-          {/* ================= MOBILE BUTTON ================= */}
+          {/* =====================================================
+              MOBILE MENU BUTTON
+          ====================================================== */}
 
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => {
+              setMenuOpen(!menuOpen);
+              setThemeOpen(false);
+            }}
             className="
               btn
               btn-square
@@ -304,19 +572,16 @@ const Header = () => {
             aria-expanded={menuOpen}
           >
             {menuOpen ? (
-              <span className="text-3xl leading-none">
-                ×
-              </span>
+              <span className="text-3xl leading-none">×</span>
             ) : (
-              <span className="text-2xl leading-none">
-                ☰
-              </span>
+              <span className="text-2xl leading-none">☰</span>
             )}
           </button>
-
         </div>
 
-        {/* ================= MOBILE MENU ================= */}
+        {/* =====================================================
+            MOBILE MENU
+        ====================================================== */}
 
         {menuOpen && (
           <div
@@ -332,18 +597,18 @@ const Header = () => {
               shadow-2xl
             "
           >
-            <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5">
-
-              {/* Mobile Links */}
+            <div className="px-3 sm:px-4 py-4">
+              {/* =================================================
+                  MOBILE LINKS
+              ================================================== */}
 
               <div className="flex flex-col gap-1">
-
                 <a
                   href="#features"
                   onClick={closeMenu}
                   className="
-                    px-4
-                    py-3
+                    px-3
+                    py-2.5
                     rounded-lg
                     text-base-content
                     font-medium
@@ -357,8 +622,8 @@ const Header = () => {
                   href="#preview"
                   onClick={closeMenu}
                   className="
-                    px-4
-                    py-3
+                    px-3
+                    py-2.5
                     rounded-lg
                     text-base-content
                     font-medium
@@ -372,8 +637,8 @@ const Header = () => {
                   href="#about"
                   onClick={closeMenu}
                   className="
-                    px-4
-                    py-3
+                    px-3
+                    py-2.5
                     rounded-lg
                     text-base-content
                     font-medium
@@ -382,17 +647,16 @@ const Header = () => {
                 >
                   About
                 </a>
-
               </div>
 
-              <div className="divider opacity-20"></div>
+              <div className="divider opacity-20 my-2"></div>
 
-              {/* ================= MOBILE THEME ================= */}
+              {/* =================================================
+                  MOBILE THEME
+              ================================================== */}
 
               <div className="mb-4">
-
                 <label
-                  htmlFor="mobile-theme"
                   className="
                     block
                     mb-2
@@ -401,81 +665,163 @@ const Header = () => {
                     text-base-content
                   "
                 >
-                  Theme
+                  Choose Theme
                 </label>
 
-                <select
-                  id="mobile-theme"
-                  value={theme}
-                  onChange={handleChangeTheme}
-                  className="
-                    select
-                    w-full
-                    bg-base-100
-                    text-base-content
-                    font-semibold
-                    border
-                    border-primary
-                    rounded-xl
-                    focus:border-primary
-                    focus:outline-none
-                  "
-                >
-                  {themes.map((item) => (
-                    <option
-                      key={item.value}
-                      value={item.value}
+                <div className="grid grid-cols-2 gap-1.5">
+                  {themes.map((item) => {
+                    const isSelected = theme === item.value;
+
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => setTheme(item.value)}
+                        className={`
+                          flex
+                          items-center
+                          gap-2
+                          px-2.5
+                          py-2
+                          rounded-lg
+                          border
+                          transition-all
+                          text-left
+                          ${
+                            isSelected
+                              ? "bg-primary text-primary-content border-primary"
+                              : "bg-base-100 text-base-content border-base-content/10 hover:bg-base-content/10"
+                          }
+                        `}
+                      >
+                        <span className="text-base">
+                          {item.label.split(" ")[0]}
+                        </span>
+
+                        <span className="text-xs font-medium truncate">
+                          {item.label.substring(2)}
+                        </span>
+
+                        {isSelected && (
+                          <span className="ml-auto font-bold">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* =================================================
+                  MOBILE USER
+              ================================================== */}
+
+              {isLogin ? (
+                <div className="flex flex-col gap-2">
+                  {/* User */}
+
+                  <button
+                    type="button"
+                    onClick={handleProfile}
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-3
+                      p-3
+                      rounded-xl
+                      bg-base-content/5
+                      border
+                      border-base-content/10
+                      hover:bg-base-content/10
+                    "
+                  >
+                    <div
+                      className="
+                        w-11
+                        h-11
+                        rounded-full
+                        bg-primary
+                        text-primary-content
+                        flex
+                        items-center
+                        justify-center
+                        font-bold
+                        text-lg
+                        shrink-0
+                      "
                     >
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+                      {userInitials}
+                    </div>
 
-              </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <p className="font-semibold truncate">{userName}</p>
 
-              {/* ================= MOBILE ACTIONS ================= */}
+                      {userEmail && (
+                        <p className="text-sm opacity-60 truncate">
+                          {userEmail}
+                        </p>
+                      )}
+                    </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
+                    <span className="text-xl opacity-60">›</span>
+                  </button>
 
-                {/* Login */}
-                <button
-                  type="button"
-                  onClick={handleLogin}
-                  className="
-                    btn
-                    flex-1
-                    bg-base-content/10
-                    text-base-content
-                    border
-                    border-base-content/10
-                    font-semibold
-                    hover:bg-base-content/20
-                  "
-                >
-                  Log in
-                </button>
+                  {/* Logout */}
 
-                {/* Register */}
-                <button
-                  type="button"
-                  onClick={handleRegister}
-                  className="
-                    btn
-                    btn-primary
-                    flex-1
-                    rounded-xl
-                    font-semibold
-                  "
-                >
-                  Get Started
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="
+                      btn
+                      w-full
+                      bg-error/10
+                      text-error
+                      border
+                      border-error/20
+                      hover:bg-error
+                      hover:text-error-content
+                    "
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    className="
+                      btn
+                      flex-1
+                      bg-base-content/10
+                      text-base-content
+                      border
+                      border-base-content/10
+                      font-semibold
+                      hover:bg-base-content/20
+                    "
+                  >
+                    Log in
+                  </button>
 
-              </div>
-
+                  <button
+                    type="button"
+                    onClick={handleRegister}
+                    className="
+                      btn
+                      btn-primary
+                      flex-1
+                      rounded-xl
+                      font-semibold
+                    "
+                  >
+                    Get Started
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
-
       </div>
     </nav>
   );
