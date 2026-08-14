@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { FaCamera } from "react-icons/fa";
+
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -24,9 +26,17 @@ const Profile = () => {
     });
   };
 
-  const handleSave = () => {
-    setEditing(false);
+  const handleSave = async () => {
+    try {
+       setEditing(false);
+       const req = 
+
     toast.success("Profile updated successfully!");
+      
+    } catch (error) {
+      
+    }
+   
   };
 
   const handleLogout = async () => {

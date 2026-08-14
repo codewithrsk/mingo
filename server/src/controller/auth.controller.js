@@ -34,8 +34,15 @@ export const RegisterUser = async (req, res, next) => {
       return next(error);
     }
     
+    const pname= fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((name) => name.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-    const photoURL = `https://placehold.co/600x400?text=${fullName.charAt(0).toUpperCase()}`;
+    const photoURL = `https://placehold.co/600x400?text=${pname}`;
 
     const photo = {
       url: photoURL,
