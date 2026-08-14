@@ -138,7 +138,7 @@ const Header = () => {
   // USER DATA
   // ============================================================
 
-  const userName = user?.fullName || user?.name || user?.username || "User";
+  const userName = user?.fullName ;
 
   const userEmail = user?.email || "";
 

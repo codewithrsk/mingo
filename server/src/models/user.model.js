@@ -36,6 +36,12 @@ const UserSchema = mongoose.Schema(
         type: String,
       },
     },
+    userid:{
+      type:String,
+    },
+    userbio:{
+      type: String,
+    },
     userType: {
       type: String,
       enum: ["admin", "user"],

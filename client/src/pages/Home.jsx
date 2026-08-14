@@ -1,7 +1,12 @@
 import React from "react";
 import api from "../config/Api.config";
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Home = () => {
+
+
+  const navigate = useNavigate();
   const testApi = async () => {
     try {
       const req = await api.get("/");
@@ -333,7 +338,7 @@ const Home = () => {
                   enjoyable way to chat.
                 </p>
 
-                <button className="btn btn-primary mt-8 rounded-xl px-7">
+                <button className="btn btn-primary mt-8 rounded-xl px-7" onClick={() => navigate("/register")}>
                   Create your account
                   <span className="text-lg">→</span>
                 </button>
