@@ -80,7 +80,7 @@ const Profile = () => {
 
           {/* Cover */}
           <div className="relative h-44 bg-primary">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-accent opacity-80" />
+            <div className="absolute inset-0 bg-linear-to-r from-primary via-secondary to-accent opacity-80" />
           </div>
 
           {/* Profile Section */}

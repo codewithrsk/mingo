@@ -55,7 +55,7 @@ const Home = () => {
 
                 {/* Buttons */}
                 <div className="mt-9 flex flex-col sm:flex-row gap-4">
-                  <button className="btn btn-primary rounded-xl px-6">
+                  <button className="btn btn-primary rounded-xl px-6" onClick={() => navigate("/chat")}>
                     Start chatting
                     <span className="text-lg transition-transform group-hover:translate-x-1">
                       →
