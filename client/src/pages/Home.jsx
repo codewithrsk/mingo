@@ -25,9 +25,9 @@ const Home = () => {
         <section className="relative min-h-screen pt-32 pb-20 flex items-center">
           {/* Background Glow */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/15 blur-[140px] rounded-full" />
+            <div className="absolute top-20 left-1/2 -translate-x-1/2 w-1500 h-150 bg-primary/15 blur-[140px] rounded-full" />
 
-            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/10 blur-[120px] rounded-full" />
+            <div className="absolute bottom-0 right-0 w-100 h-100 bg-primary/10 blur-[120px] rounded-full" />
           </div>
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8 w-full">
@@ -84,7 +84,7 @@ const Home = () => {
               {/* ================= CHAT PREVIEW ================= */}
               <div
                 id="preview"
-                className="relative lg:ml-auto w-full max-w-[480px]"
+                className="relative lg:ml-auto w-full max-w-120"
               >
                 {/* Glow */}
                 <div className="absolute -inset-5 bg-primary/15 blur-3xl rounded-full" />
@@ -137,7 +137,7 @@ const Home = () => {
                   </div>
 
                   {/* ================= MESSAGES ================= */}
-                  <div className="p-5 h-[380px] flex flex-col gap-4">
+                  <div className="p-5 h-95 flex flex-col gap-4">
                     {/* Date */}
                     <div className="text-center text-xs text-base-content/40">
                       Today
@@ -150,7 +150,7 @@ const Home = () => {
                       </div>
 
                       <div>
-                        <div className="px-4 py-3 bg-base-300 rounded-2xl rounded-bl-md text-sm text-base-content max-w-[260px]">
+                        <div className="px-4 py-3 bg-base-300 rounded-2xl rounded-bl-md text-sm text-base-content max-w-65">
                           Hey! Are you free this evening?
                         </div>
 
@@ -163,7 +163,7 @@ const Home = () => {
                     {/* Sent Message */}
                     <div className="flex items-end justify-end">
                       <div>
-                        <div className="px-4 py-3 bg-primary text-primary-content rounded-2xl rounded-br-md text-sm max-w-[260px]">
+                        <div className="px-4 py-3 bg-primary text-primary-content rounded-2xl rounded-br-md text-sm max-w-65">
                           Yeah! Let's catch up. 😊
                         </div>
 
