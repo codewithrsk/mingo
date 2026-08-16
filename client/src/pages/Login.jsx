@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setUser, setIsLogin, setRole,isLogin } = useAuth();
+  const { setUser, setIsLogin, setRole, isLogin } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,9 @@ const Login = () => {
   if (isLogin) {
     return (
       <>
-        <div className="min-h-[91vh] flex items-center justify-center px-4 py-8 bg-base-200">You Are Already Logged In</div>
+        <div className="min-h-[91vh] flex items-center justify-center px-4 py-8 bg-base-200">
+          You Are Already Logged In
+        </div>
       </>
     );
   }

@@ -2,10 +2,7 @@ import React from "react";
 import api from "../config/Api.config";
 import { Link, useNavigate } from "react-router-dom";
 
-
 const Home = () => {
-
-
   const navigate = useNavigate();
   const testApi = async () => {
     try {
@@ -55,7 +52,10 @@ const Home = () => {
 
                 {/* Buttons */}
                 <div className="mt-9 flex flex-col sm:flex-row gap-4">
-                  <button className="btn btn-primary rounded-xl px-6" onClick={() => navigate("/chat")}>
+                  <button
+                    className="btn btn-primary rounded-xl px-6"
+                    onClick={() => navigate("/chat")}
+                  >
                     Start chatting
                     <span className="text-lg transition-transform group-hover:translate-x-1">
                       →
@@ -338,7 +338,10 @@ const Home = () => {
                   enjoyable way to chat.
                 </p>
 
-                <button className="btn btn-primary mt-8 rounded-xl px-7" onClick={() => navigate("/register")}>
+                <button
+                  className="btn btn-primary mt-8 rounded-xl px-7"
+                  onClick={() => navigate("/register")}
+                >
                   Create your account
                   <span className="text-lg">→</span>
                 </button>
