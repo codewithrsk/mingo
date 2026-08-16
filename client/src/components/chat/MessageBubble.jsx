@@ -4,11 +4,7 @@ const MessageBubble = ({ message }) => {
   const isMine = message.sender === "me";
 
   return (
-    <div
-      className={`flex ${
-        isMine ? "justify-end" : "justify-start"
-      }`}
-    >
+    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div
         className={`
           max-w-[80%]
@@ -38,19 +34,13 @@ const MessageBubble = ({ message }) => {
             justify-end
             gap-1
             text-[10px]
-            ${
-              isMine
-                ? "text-primary-content/60"
-                : "text-base-content/40"
-            }
+            ${isMine ? "text-primary-content/60" : "text-base-content/40"}
           `}
         >
           <span>{message.time}</span>
 
           {isMine && (
-            <span className="text-sm">
-              {message.seen ? "✓✓" : "✓"}
-            </span>
+            <span className="text-sm">{message.seen ? "✓✓" : "✓"}</span>
           )}
         </div>
       </div>

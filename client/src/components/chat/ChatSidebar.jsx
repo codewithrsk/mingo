@@ -9,7 +9,7 @@ const ChatSidebar = ({
   onNewChat,
 }) => {
   const filteredChats = chats.filter((chat) =>
-    chat.name.toLowerCase().includes(search.toLowerCase())
+    chat.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -24,9 +24,7 @@ const ChatSidebar = ({
 
             <div>
               <h1 className="text-xl font-bold">mingo</h1>
-              <p className="text-xs text-base-content/50">
-                Messages
-              </p>
+              <p className="text-xs text-base-content/50">Messages</p>
             </div>
           </div>
 
@@ -66,24 +64,15 @@ const ChatSidebar = ({
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto px-4 py-3">
-        <button
-          type="button"
-          className="btn btn-primary btn-sm rounded-full"
-        >
+        <button type="button" className="btn btn-primary btn-sm rounded-full">
           All
         </button>
 
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm rounded-full"
-        >
+        <button type="button" className="btn btn-ghost btn-sm rounded-full">
           Unread
         </button>
 
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm rounded-full"
-        >
+        <button type="button" className="btn btn-ghost btn-sm rounded-full">
           Groups
         </button>
       </div>
@@ -94,9 +83,7 @@ const ChatSidebar = ({
           <div className="flex h-48 flex-col items-center justify-center text-center">
             <div className="mb-2 text-3xl">🔍</div>
 
-            <p className="font-medium">
-              No conversations found
-            </p>
+            <p className="font-medium">No conversations found</p>
 
             <p className="mt-1 text-xs text-base-content/50">
               Try searching for another person
@@ -154,9 +141,7 @@ const ChatSidebar = ({
               {/* Chat Information */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="truncate font-semibold">
-                    {chat.name}
-                  </h3>
+                  <h3 className="truncate font-semibold">{chat.name}</h3>
 
                   <span className="whitespace-nowrap text-[11px] text-base-content/40">
                     {chat.time}
@@ -192,13 +177,9 @@ const ChatSidebar = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <h4 className="truncate font-semibold">
-              Ravi Kumar
-            </h4>
+            <h4 className="truncate font-semibold">Ravi Kumar</h4>
 
-            <p className="text-xs text-success">
-              Online
-            </p>
+            <p className="text-xs text-success">Online</p>
           </div>
 
           <button

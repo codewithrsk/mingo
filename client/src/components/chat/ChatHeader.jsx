@@ -28,9 +28,7 @@ const ChatHeader = ({ chat, onBack }) => {
 
         {/* User Info */}
         <div className="min-w-0">
-          <h2 className="truncate font-bold">
-            {chat.name}
-          </h2>
+          <h2 className="truncate font-bold">{chat.name}</h2>
 
           <p className="text-xs text-base-content/50">
             {chat.online ? "Online" : "Offline"}
@@ -64,11 +62,7 @@ const ChatHeader = ({ chat, onBack }) => {
           📹
         </button>
 
-        <button
-          type="button"
-          className="btn btn-ghost btn-circle"
-          title="More"
-        >
+        <button type="button" className="btn btn-ghost btn-circle" title="More">
           ⋮
         </button>
       </div>
