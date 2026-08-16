@@ -2,7 +2,7 @@ import React from "react";
 
 const ChatHeader = ({ chat, onBack }) => {
   return (
-    <header className="flex h-[76px] shrink-0 items-center justify-between border-b border-base-300 bg-base-100 px-4 md:px-6">
+    <header className="flex h-19 shrink-0 items-center justify-between border-b border-base-300 bg-base-100 px-4 md:px-6">
       {/* Left */}
       <div className="flex min-w-0 items-center gap-3">
         {/* Mobile Back */}

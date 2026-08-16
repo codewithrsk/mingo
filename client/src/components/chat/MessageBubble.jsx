@@ -21,7 +21,7 @@ const MessageBubble = ({ message }) => {
         `}
       >
         {/* Text */}
-        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed md:text-[15px]">
+        <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed md:text-[15px]">
           {message.text}
         </p>
 

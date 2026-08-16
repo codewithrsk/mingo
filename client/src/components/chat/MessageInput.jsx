@@ -43,7 +43,7 @@ const MessageInput = ({ onSend }) => {
             className="
               textarea
               textarea-bordered
-              min-h-[48px]
+              min-h-12
               max-h-32
               w-full
               resize-none
