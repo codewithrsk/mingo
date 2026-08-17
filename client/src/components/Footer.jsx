@@ -1,11 +1,6 @@
 import React from "react";
-import {Link} from "react-router-dom";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaGithub,
-  FaDiscord,
-} from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaFacebookF, FaInstagram, FaGithub, FaDiscord } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import logo from "../assets/logo.png";
 import logo2 from "../assets/logo2.png";
@@ -16,20 +11,14 @@ const Footer = () => {
   return (
     <footer className="bg-base-200 text-base-content border-t border-base-300">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
-
         {/* ================= MAIN FOOTER ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16">
-
           {/* ================= BRAND ================= */}
           <div className="lg:col-span-1">
-
             {/* Logo */}
-            <Link
-              to="/"
-              className="inline-flex items-center gap-3 group"
-            >
+            <Link to="/" className="inline-flex items-center gap-3 group">
               <div
-                            className="
+                className="
                               flex
                               items-center
                               justify-center
@@ -47,49 +36,48 @@ const Footer = () => {
                               duration-200
                               hover:scale-105
                             "
-                          >
-                            <img
-                              src={logo}
-                              alt="Mingo Logo"
-                              className="
+              >
+                <img
+                  src={logo}
+                  alt="Mingo Logo"
+                  className="
                                 w-[70%]
                                 h-[70%]
                                 object-contain
                               "
-                            />
-                          </div>
-              
-                          {/* Mingo Text Logo */}
-                          <div
-                            className="
+                />
+              </div>
+
+              {/* Mingo Text Logo */}
+              <div
+                className="
                               h-[5vh]
                               max-h-10
                               flex
                               items-center
                             "
-                          >
-                            <img
-                              src={logo2}
-                              alt="Mingo"
-                              className="
+              >
+                <img
+                  src={logo2}
+                  alt="Mingo"
+                  className="
                                 h-full
                                 w-auto
                                 max-w-32
                                 object-contain
                               "
-                            />
-                          </div>
+                />
+              </div>
             </Link>
 
             {/* Description */}
             <p className="mt-5 text-sm leading-6 text-base-content/70 max-w-xs">
-              Connect with your friends, share moments and enjoy
-              conversations that matter.
+              Connect with your friends, share moments and enjoy conversations
+              that matter.
             </p>
 
             {/* ================= SOCIAL ICONS ================= */}
             <div className="flex items-center gap-2 mt-6">
-
               {/* Facebook */}
               <Link
                 to="#"
@@ -134,7 +122,6 @@ const Footer = () => {
               >
                 <FaDiscord size={19} />
               </Link>
-
             </div>
           </div>
 
@@ -145,7 +132,6 @@ const Footer = () => {
             </h3>
 
             <ul className="space-y-3 text-sm">
-
               <li>
                 <Link
                   to="#"
@@ -181,7 +167,6 @@ const Footer = () => {
                   Notifications
                 </Link>
               </li>
-
             </ul>
           </div>
 
@@ -192,7 +177,6 @@ const Footer = () => {
             </h3>
 
             <ul className="space-y-3 text-sm">
-
               <li>
                 <Link
                   to="#"
@@ -228,7 +212,6 @@ const Footer = () => {
                   Blog
                 </Link>
               </li>
-
             </ul>
           </div>
 
@@ -239,7 +222,6 @@ const Footer = () => {
             </h3>
 
             <ul className="space-y-3 text-sm">
-
               <li>
                 <Link
                   to="#"
@@ -275,10 +257,8 @@ const Footer = () => {
                   Security
                 </Link>
               </li>
-
             </ul>
           </div>
-
         </div>
 
         {/* ================= DIVIDER ================= */}
@@ -286,7 +266,6 @@ const Footer = () => {
 
         {/* ================= BOTTOM FOOTER ================= */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-
           {/* Copyright */}
           <p className="text-sm text-base-content/60 text-center md:text-left">
             © {currentYear} Mingo. All rights reserved.
@@ -294,13 +273,10 @@ const Footer = () => {
 
           {/* Made With */}
           <p className="text-sm text-base-content/60 text-center">
-            Made with{" "}
-            <span className="text-error text-base">♥</span>{" "}
-            for better conversations
+            Made with <span className="text-error text-base">♥</span> for better
+            conversations
           </p>
-
         </div>
-
       </div>
     </footer>
   );

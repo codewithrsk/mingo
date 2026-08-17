@@ -138,11 +138,17 @@ const Header = () => {
   // USER DATA
   // ============================================================
 
-  const userName = user?.fullName ;
+  const userName = user?.fullName;
 
   const userEmail = user?.email || "";
 
-  const userInitials = userName?.split(" ").filter(Boolean).map((name) => name.charAt(0)).join("").slice(0, 2).toUpperCase();
+  const userInitials = userName
+    ?.split(" ")
+    .filter(Boolean)
+    .map((name) => name.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   // ============================================================
   // SELECTED THEME
