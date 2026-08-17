@@ -211,6 +211,7 @@ const Home = () => {
                         type="text"
                         placeholder="Type a message..."
                         className="input input-ghost flex-1 bg-transparent outline-none text-sm"
+                        disabled
                       />
 
                       <button
