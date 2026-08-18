@@ -89,9 +89,9 @@ const Footer = () => {
 
               {/* Instagram */}
               <Link
-                to="#"
+                to="https://www.instagram.com/?hl=en"
                 aria-label="Instagram"
-                className="btn btn-circle btn-ghost !text-primary-content hover:!bg-primary hover:!text-primary-content transition-all duration-200"
+                className="btn btn-circle text-primary-content hover:bg-primary! hover:text-primary!-content transition-all duration-200"
               >
                 <FaInstagram size={18} />
               </Link>

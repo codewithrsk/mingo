@@ -544,7 +544,7 @@ const Header = () => {
                     transition-all
                   "
                 >
-                  Get Started
+                  Register
                 </button>
               </>
             )}
