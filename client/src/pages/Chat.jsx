@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 
 import ChatSidebar from "../components/chat/ChatSidebar";
@@ -26,6 +26,8 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
 
   const [showSidebar, setShowSidebar] = useState(true);
+
+  const messagesEndRef = useRef(null);
 
   // Current logged-in user ID
   const currentUserId = user?._id;
@@ -194,6 +196,18 @@ const Chat = () => {
       clearInterval(interval);
     };
   }, [selectedFriend]);
+
+  // is selected, scroll to the bottom.
+  useEffect(() => {
+    if (!selectedFriend?._id) {
+      return;
+    }
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages]);
 
   // =====================================================
   // SEND MESSAGE
@@ -398,6 +412,8 @@ const Chat = () => {
                       )}
 
                     </div>
+                    <div ref={messagesEndRef}></div>
+                    
                   </>
                 )}
 
