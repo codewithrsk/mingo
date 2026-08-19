@@ -1,49 +1,82 @@
 import React, { useState } from "react";
 
-const MessageInput = ({ onSend }) => {
-  const [message, setMessage] = useState("");
+const MessageInput = ({
+  onSend,
+  sending,
+}) => {
+  const [message, setMessage] =
+    useState("");
 
-  const sendMessage = () => {
+  // =====================================================
+  // SEND
+  // =====================================================
+
+  const handleSend = async () => {
     const text = message.trim();
 
-    if (!text) return;
+    if (!text || sending) {
+      return;
+    }
 
-    onSend(text);
-    setMessage("");
+    const success =
+      await onSend(text);
+
+    if (success) {
+      setMessage("");
+    }
   };
 
+  // =====================================================
+  // ENTER TO SEND
+  // =====================================================
+
   const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
       event.preventDefault();
-      sendMessage();
+
+      handleSend();
     }
   };
 
   return (
     <div className="shrink-0 border-t border-base-300 bg-base-100 px-3 py-3 md:px-6">
-      <div className="mx-auto flex max-w-4xl items-center gap-9 justify-center md:justify-between">
-        {/* Attachment */}
-        <label
-          htmlFor="file-input"
+
+      <div className="mx-auto flex max-w-4xl items-end gap-2">
+
+        {/* =================================================
+            ATTACHMENT
+        ================================================= */}
+
+        <button
+          type="button"
           className="btn btn-ghost btn-circle shrink-0"
-          title="Attach file"
+          title="Attach"
         >
           📎
-        </label>
-        <input type="file" id="file-input" className="hidden" />
+        </button>
 
-        {/* Input */}
-        <div className="relative flex-1 justify-center items-center">
+        {/* =================================================
+            MESSAGE INPUT
+        ================================================= */}
+
+        <div className="relative flex-1">
+
           <textarea
             rows="1"
             value={message}
-            onChange={(event) => setMessage(event.target.value)}
+            disabled={sending}
+            onChange={(event) =>
+              setMessage(event.target.value)
+            }
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             className="
               textarea
               textarea-bordered
-              min-h-12
+              min-h-[48px]
               max-h-32
               w-full
               resize-none
@@ -65,35 +98,39 @@ const MessageInput = ({ onSend }) => {
               btn-circle
               btn-sm
               absolute
-              bottom-3
+              bottom-2
               right-2
             "
             title="Emoji"
           >
             😊
           </button>
+
         </div>
 
-        {/* Send / Voice */}
-        {message.trim() ? (
-          <button
-            type="button"
-            onClick={sendMessage}
-            className="btn btn-primary btn-circle shrink-0"
-            title="Send message"
-          >
-            ➤
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-primary btn-circle shrink-0"
-            title="Voice message"
-          >
-            🎤
-          </button>
-        )}
+        {/* =================================================
+            SEND BUTTON
+        ================================================= */}
+
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={
+            sending ||
+            !message.trim()
+          }
+          className="btn btn-primary btn-circle shrink-0"
+          title="Send"
+        >
+          {sending ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            "➤"
+          )}
+        </button>
+
       </div>
+
     </div>
   );
 };

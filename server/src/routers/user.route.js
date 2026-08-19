@@ -1,7 +1,7 @@
 import express from "express";
-import { getAllUsers, updateProfile } from "../controllers/userController.js";
-import { SendMessage, GetMessages } from "../controllers/messageController.js";
-import { Protect } from "../middleware/authMiddleware.js";
+import { getAllUsers, updateProfile } from "../controller/user.controller.js";
+import { SendMessage, GetMessages } from "../controller/message.controller.js";
+import { Protect } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

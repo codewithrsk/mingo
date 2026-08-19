@@ -75,12 +75,15 @@ export const RegisterUser = async (req, res, next) => {
 export const LoginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log(1);
+    
 
     if (!email || !password) {
       const error = new Error("All fields Required");
       error.statusCode = 400;
       return next(error);
     }
+
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {

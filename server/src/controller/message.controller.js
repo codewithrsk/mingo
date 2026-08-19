@@ -1,4 +1,4 @@
-import Message from "../models/messageModel.js";
+import Message from "../models/message.model.js";
 
 export const SendMessage = async (req, res) => {
   try {
@@ -19,9 +19,7 @@ export const SendMessage = async (req, res) => {
       receiverId: receiverID,
       message,
     });
-    res
-      .status(201)
-      .json({ message: "Message sent successfully", data: newMessage });
+    res.status(201).json({ message: "Message sent successfully", data: newMessage });
   } catch (error) {
     console.log(error.message);
     next();

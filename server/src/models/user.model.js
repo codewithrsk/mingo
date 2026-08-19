@@ -36,12 +36,6 @@ const UserSchema = mongoose.Schema(
         type: String,
       },
     },
-    userid:{
-      type:String,
-    },
-    userbio:{
-      type: String,
-    },
     userType: {
       type: String,
       enum: ["admin", "user"],
@@ -54,6 +48,6 @@ const UserSchema = mongoose.Schema(
   },
 );
 
-const User = mongoose.model("user", UserSchema);
+const User = mongoose.model("User", UserSchema);
 
 export default User;

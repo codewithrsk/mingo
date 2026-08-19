@@ -63,7 +63,7 @@ const Login = () => {
       toast.success(res.data.message || "Login successful!");
 
       // Navigate only after successful login
-      navigate("/");
+      navigate("/chat");
     } catch (error) {
       console.error("Login Error:", error);
 

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -9,9 +9,10 @@ import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 
 const App = () => {
+  const path = useLocation().pathname;
   return (
     <div>
-      <BrowserRouter>
+      
         <Toaster />
         <Header />
         <Routes>
@@ -22,8 +23,8 @@ const App = () => {
 
           <Route path="/chat" element={<Chat />} />
         </Routes>
-        <Footer />
-      </BrowserRouter>
+        {path !== "/chat" && <Footer/>}
+      
     </div>
   );
 };

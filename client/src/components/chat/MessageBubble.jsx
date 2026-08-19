@@ -1,10 +1,47 @@
 import React from "react";
 
-const MessageBubble = ({ message }) => {
-  const isMine = message.sender === "me";
+const MessageBubble = ({
+  message,
+  currentUserId,
+}) => {
+  // =====================================================
+  // GET SENDER ID
+  // =====================================================
+
+  const senderId =
+    message?.senderId?._id ||
+    message?.senderId;
+
+  // =====================================================
+  // CHECK WHETHER MESSAGE IS MINE
+  // =====================================================
+
+  const isMine =
+    String(senderId) ===
+    String(currentUserId);
+
+  // =====================================================
+  // FORMAT TIME
+  // =====================================================
+
+  const messageTime = message?.createdAt
+    ? new Date(
+        message.createdAt
+      ).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
 
   return (
-    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+    <div
+      className={`flex ${
+        isMine
+          ? "justify-end"
+          : "justify-start"
+      }`}
+    >
+
       <div
         className={`
           max-w-[80%]
@@ -20,12 +57,15 @@ const MessageBubble = ({ message }) => {
           }
         `}
       >
-        {/* Text */}
-        <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed md:text-[15px]">
-          {message.text}
+
+        {/* Message */}
+
+        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed md:text-[15px]">
+          {message?.message}
         </p>
 
-        {/* Time + Read Status */}
+        {/* Time */}
+
         <div
           className={`
             mt-1
@@ -34,16 +74,30 @@ const MessageBubble = ({ message }) => {
             justify-end
             gap-1
             text-[10px]
-            ${isMine ? "text-primary-content/60" : "text-base-content/40"}
+            ${
+              isMine
+                ? "text-primary-content/60"
+                : "text-base-content/40"
+            }
           `}
         >
-          <span>{message.time}</span>
+
+          <span>
+            {messageTime}
+          </span>
+
+          {/* Sent check */}
 
           {isMine && (
-            <span className="text-sm">{message.seen ? "✓✓" : "✓"}</span>
+            <span className="text-sm">
+              ✓
+            </span>
           )}
+
         </div>
+
       </div>
+
     </div>
   );
 };
