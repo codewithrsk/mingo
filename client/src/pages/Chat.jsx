@@ -1,4 +1,5 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
 import { useAuth } from "../context/AuthContext";
 
 import ChatSidebar from "../components/chat/ChatSidebar";
@@ -27,9 +28,18 @@ const Chat = () => {
 
   const [showSidebar, setShowSidebar] = useState(true);
 
+  // =====================================================
+  // REFS - ONLY FOR CHAT SCROLL
+  // =====================================================
+
+  const messagesContainerRef = useRef(null);
+
   const messagesEndRef = useRef(null);
 
-  // Current logged-in user ID
+  // =====================================================
+  // CURRENT USER
+  // =====================================================
+
   const currentUserId = user?._id;
 
   // =====================================================
@@ -42,18 +52,12 @@ const Chat = () => {
 
       const response = await api.get("/user/allUsers");
 
-      console.log("All Users:", response.data);
-
       const usersData =
-        response.data?.users ||
-        response.data?.data ||
-        response.data;
+        response.data?.users || response.data?.data || response.data;
 
       if (Array.isArray(usersData)) {
-        // Remove logged-in user
         const friends = usersData.filter(
-          (item) =>
-            String(item._id) !== String(currentUserId)
+          (item) => String(item._id) !== String(currentUserId),
         );
 
         setUsers(friends);
@@ -62,6 +66,7 @@ const Chat = () => {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+
       setUsers([]);
     } finally {
       setLoadingUsers(false);
@@ -69,7 +74,36 @@ const Chat = () => {
   };
 
   // =====================================================
-  // FETCH CHAT DATA
+  // CHECK IF USER IS NEAR BOTTOM
+  // =====================================================
+
+  const isNearBottom = () => {
+    const container = messagesContainerRef.current;
+
+    if (!container) {
+      return true;
+    }
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    return distanceFromBottom < 150;
+  };
+
+  // =====================================================
+  // SCROLL TO BOTTOM
+  // =====================================================
+
+  const scrollToBottom = (behavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior,
+      block: "end",
+    });
+  };
+
+  // =====================================================
+  // GET MESSAGES
+  // ONLY FUNCTION THAT CALLS GET-MESSAGES API
   // =====================================================
 
   const fetchChatData = async () => {
@@ -78,31 +112,35 @@ const Chat = () => {
     }
 
     try {
+      const shouldScroll = isNearBottom();
+
       const friendId = selectedFriend._id;
 
-      const response = await api.get(
-        `/user/get-messages/${friendId}`
-      );
-
-      console.log("Chat Data:", response.data);
+      const response = await api.get(`/user/get-messages/${friendId}`);
 
       const messagesData =
-        response.data?.messages ||
-        response.data?.data ||
-        response.data;
+        response.data?.messages || response.data?.data || response.data;
 
       if (Array.isArray(messagesData)) {
         setMessages(messagesData);
+
+        // Don't disturb the user if they are
+        // reading old messages.
+        if (shouldScroll) {
+          setTimeout(() => {
+            scrollToBottom("smooth");
+          }, 50);
+        }
       } else {
         setMessages([]);
       }
     } catch (error) {
-      console.error("Error fetching chat data:", error);
+      console.error("Error fetching messages:", error);
     }
   };
 
   // =====================================================
-  // GET USERS WHEN CHAT PAGE LOADS
+  // GET USERS WHEN PAGE LOADS
   // =====================================================
 
   useEffect(() => {
@@ -120,15 +158,15 @@ const Chat = () => {
   const handleSelectFriend = (friend) => {
     setSelectedFriend(friend);
 
-    // Clear previous friend's messages immediately
+    // Remove previous friend's messages
     setMessages([]);
 
-    // Mobile: hide sidebar
+    // Mobile
     setShowSidebar(false);
   };
 
   // =====================================================
-  // FETCH MESSAGES WHENEVER FRIEND CHANGES
+  // FETCH MESSAGES WHEN FRIEND CHANGES
   // =====================================================
 
   useEffect(() => {
@@ -136,117 +174,60 @@ const Chat = () => {
       return;
     }
 
-    // Initial loading state
     setLoadingMessages(true);
 
-    // ===================================================
-    // FIRST FETCH
-    // ===================================================
+    // Fetch immediately
+    fetchChatData().finally(() => {
+      setLoadingMessages(false);
 
-    const loadInitialMessages = async () => {
-      try {
-        const friendId = selectedFriend._id;
+      // When opening a friend, always show
+      // the latest message.
+      setTimeout(() => {
+        scrollToBottom("auto");
+      }, 100);
+    });
 
-        const response = await api.get(
-          `/user/get-messages/${friendId}`
-        );
-
-        console.log(
-          "Initial Messages:",
-          response.data
-        );
-
-        const messagesData =
-          response.data?.messages ||
-          response.data?.data ||
-          response.data;
-
-        if (Array.isArray(messagesData)) {
-          setMessages(messagesData);
-        } else {
-          setMessages([]);
-        }
-      } catch (error) {
-        console.error(
-          "Error fetching initial messages:",
-          error
-        );
-
-        setMessages([]);
-      } finally {
-        setLoadingMessages(false);
-      }
-    };
-
-    loadInitialMessages();
-
-    // ===================================================
-    // FETCH EVERY 2 SECONDS
-    // ===================================================
-
+    // Continue fetching every 2 seconds
     const interval = setInterval(() => {
       fetchChatData();
     }, 2000);
 
-    // ===================================================
-    // CLEANUP OLD INTERVAL
-    // ===================================================
-
+    // Clear old interval when friend changes
+    // or component unmounts
     return () => {
       clearInterval(interval);
     };
   }, [selectedFriend]);
-
-  // is selected, scroll to the bottom.
-  useEffect(() => {
-    if (!selectedFriend?._id) {
-      return;
-    }
-
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  }, [messages]);
 
   // =====================================================
   // SEND MESSAGE
   // =====================================================
 
   const handleSendMessage = async (message) => {
-    if (
-      !selectedFriend?._id ||
-      !message.trim() ||
-      sending
-    ) {
+    if (!selectedFriend?._id || !message.trim() || sending) {
       return false;
     }
 
     try {
       setSending(true);
 
-      const response = await api.post(
-        "/user/send-message",
-        {
-          receiverID: selectedFriend._id,
-          message: message.trim(),
-        }
-      );
+      await api.post("/user/send-message", {
+        receiverID: selectedFriend._id,
 
-      console.log(
-        "Message sent:",
-        response.data
-      );
+        message: message.trim(),
+      });
 
-      // Refresh immediately
+      // Get updated messages
       await fetchChatData();
+
+      // Always go to latest message
+      setTimeout(() => {
+        scrollToBottom("smooth");
+      }, 100);
 
       return true;
     } catch (error) {
-      console.error(
-        "Error sending message:",
-        error
-      );
+      console.error("Error sending message:", error);
 
       return false;
     } finally {
@@ -261,7 +242,6 @@ const Chat = () => {
   return (
     <div className="h-[91vh] w-full overflow-hidden bg-base-200 text-base-content">
       <div className="flex h-full">
-
         {/* =================================================
             SIDEBAR
         ================================================= */}
@@ -270,11 +250,7 @@ const Chat = () => {
           className={`
             h-full
             w-full
-            ${
-              showSidebar
-                ? "flex"
-                : "hidden"
-            }
+            ${showSidebar ? "flex" : "hidden"}
             md:flex
             md:w-auto
           `}
@@ -299,38 +275,26 @@ const Chat = () => {
             min-w-0
             flex-1
             flex-col
-            ${
-              showSidebar
-                ? "hidden md:flex"
-                : "flex"
-            }
+            ${showSidebar ? "hidden md:flex" : "flex"}
           `}
         >
-
           {/* =================================================
               NO FRIEND SELECTED
           ================================================= */}
 
           {!selectedFriend ? (
             <div className="flex h-full flex-1 items-center justify-center bg-base-200">
-
               <div className="px-6 text-center">
-
                 <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary text-4xl font-bold text-primary-content shadow-lg">
                   M
                 </div>
 
-                <h1 className="text-2xl font-bold">
-                  Welcome to Mingo
-                </h1>
+                <h1 className="text-2xl font-bold">Welcome to Mingo</h1>
 
                 <p className="mx-auto mt-2 max-w-md text-base-content/50">
-                  Select a friend from the sidebar
-                  to start chatting.
+                  Select a friend from the sidebar to start chatting.
                 </p>
-
               </div>
-
             </div>
           ) : (
             <>
@@ -344,92 +308,65 @@ const Chat = () => {
               />
 
               {/* =================================================
-                  MESSAGE AREA
+                  MESSAGES
               ================================================= */}
 
-              <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
-
+              <div
+                ref={messagesContainerRef}
+                className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8"
+              >
                 {loadingMessages ? (
                   <div className="flex h-full items-center justify-center">
-
                     <span className="loading loading-spinner loading-lg text-primary" />
-
                   </div>
                 ) : messages.length === 0 ? (
-                  /* ===============================================
-                     NO MESSAGES
-                  =============================================== */
-
                   <div className="flex h-full flex-col items-center justify-center text-center">
-
                     <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-3xl">
                       👋
                     </div>
 
-                    <h2 className="text-xl font-bold">
-                      Start a conversation
-                    </h2>
+                    <h2 className="text-xl font-bold">Start a conversation</h2>
 
                     <p className="mt-2 max-w-sm text-sm text-base-content/50">
                       No messages yet with{" "}
-
                       <span className="font-semibold text-base-content">
                         {selectedFriend.fullName}
                       </span>
                       .
                     </p>
-
                   </div>
                 ) : (
                   <>
-                    {/* Date */}
-
                     <div className="mb-6 flex justify-center">
-
                       <span className="rounded-full bg-base-100 px-4 py-1.5 text-xs text-base-content/50 shadow-sm">
                         Today
                       </span>
-
                     </div>
-
-                    {/* Messages */}
 
                     <div className="mx-auto max-w-4xl space-y-3">
+                      {messages.map((message, index) => (
+                        <MessageBubble
+                          key={message._id || index}
+                          message={message}
+                          currentUserId={currentUserId}
+                        />
+                      ))}
 
-                      {messages.map(
-                        (message, index) => (
-                          <MessageBubble
-                            key={
-                              message._id ||
-                              index
-                            }
-                            message={message}
-                            currentUserId={
-                              currentUserId
-                            }
-                          />
-                        )
-                      )}
+                      {/* Bottom of messages */}
 
+                      <div ref={messagesEndRef} />
                     </div>
-                    <div ref={messagesEndRef}></div>
-                    
                   </>
                 )}
-
               </div>
 
               {/* =================================================
                   MESSAGE INPUT
               ================================================= */}
 
-              <MessageInput
-                onSend={handleSendMessage}
-                sending={sending}
-              />
+              <MessageInput onSend={handleSendMessage} sending={sending} />
             </>
           )}
-
         </main>
       </div>
     </div>
