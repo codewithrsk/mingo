@@ -1,28 +1,35 @@
 import React from "react";
 
+import {
+  FiSearch,
+  FiUser,
+} from "react-icons/fi";
+
 const ChatSidebar = ({
-  users,
+  users = [],
   selectedFriend,
   onSelectFriend,
-  search,
+  search = "",
   setSearch,
   loading,
 }) => {
   // =====================================================
-  // SEARCH USERS
+  // FILTER USERS
   // =====================================================
 
   const filteredUsers = users.filter((user) => {
-    const name = user.fullName || "";
-    const email = user.email || "";
+    const name =
+      user?.fullName || "";
+
+    const email =
+      user?.email || "";
+
+    const query =
+      search?.toLowerCase() || "";
 
     return (
-      name
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      email
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      name.toLowerCase().includes(query) ||
+      email.toLowerCase().includes(query)
     );
   });
 
@@ -31,10 +38,12 @@ const ChatSidebar = ({
   // =====================================================
 
   const getInitials = (user) => {
-    const name = user?.fullName || "User";
+    const name =
+      user?.fullName || "User";
 
     return name
       .split(" ")
+      .filter(Boolean)
       .map((word) => word[0])
       .join("")
       .slice(0, 2)
@@ -52,13 +61,9 @@ const ChatSidebar = ({
 
         <div className="mb-5 flex items-center gap-3">
 
-          {/* Logo */}
-
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-content">
             M
           </div>
-
-          {/* Title */}
 
           <div>
             <h1 className="text-xl font-bold">
@@ -76,31 +81,26 @@ const ChatSidebar = ({
             SEARCH
         ================================================= */}
 
-        <div className="relative">
+        <label className="input input-bordered flex w-full items-center gap-3 bg-base-200">
 
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40">
-            🔍
-          </span>
+          <FiSearch
+            size={18}
+            className="shrink-0 text-base-content/50"
+          />
 
           <input
             type="text"
             value={search}
             onChange={(event) =>
-              setSearch(event.target.value)
+              setSearch?.(
+                event.target.value
+              )
             }
             placeholder="Search friends..."
-            className="
-              input
-              input-bordered
-              w-full
-              bg-base-200
-              pl-11
-              focus:border-primary
-              focus:outline-none
-            "
+            className="grow bg-transparent outline-none"
           />
 
-        </div>
+        </label>
 
       </div>
 
@@ -110,23 +110,22 @@ const ChatSidebar = ({
 
       <div className="flex-1 overflow-y-auto p-2">
 
-        {/* Loading */}
-
         {loading ? (
+
           <div className="flex h-40 items-center justify-center">
 
             <span className="loading loading-spinner loading-md text-primary" />
 
           </div>
-        ) : filteredUsers.length === 0 ? (
 
-          /* No users */
+        ) : filteredUsers.length === 0 ? (
 
           <div className="flex h-48 flex-col items-center justify-center text-center">
 
-            <div className="mb-3 text-3xl">
-              👤
-            </div>
+            <FiUser
+              size={32}
+              className="mb-3 text-base-content/40"
+            />
 
             <p className="font-medium">
               No friends found
@@ -137,28 +136,37 @@ const ChatSidebar = ({
             </p>
 
           </div>
-        ) : (
 
-          /* Users */
+        ) : (
 
           filteredUsers.map((friend) => {
 
             const isSelected =
               selectedFriend?._id ===
-              friend._id;
+              friend?._id;
 
             const name =
-              friend.fullName || "User";
+              friend?.fullName ||
+              "User";
+
+            const email =
+              friend?.email ||
+              "";
 
             const photo =
-              friend.photo?.url;
+              friend?.photo?.url;
 
             return (
               <button
-                key={friend._id}
+                key={
+                  friend?._id ||
+                  friend?.id
+                }
                 type="button"
                 onClick={() =>
-                  onSelectFriend(friend)
+                  onSelectFriend?.(
+                    friend
+                  )
                 }
                 className={`
                   mb-1
@@ -178,17 +186,22 @@ const ChatSidebar = ({
                 `}
               >
 
-                {/* Avatar */}
+                {/* =================================================
+                    AVATAR
+                ================================================= */}
 
                 <div className="shrink-0">
 
                   {photo ? (
+
                     <img
                       src={photo}
                       alt={name}
                       className="h-12 w-12 rounded-full object-cover"
                     />
+
                   ) : (
+
                     <div
                       className={`
                         flex
@@ -205,13 +218,18 @@ const ChatSidebar = ({
                         }
                       `}
                     >
-                      {getInitials(friend)}
+                      {getInitials(
+                        friend
+                      )}
                     </div>
+
                   )}
 
                 </div>
 
-                {/* Friend information */}
+                {/* =================================================
+                    FRIEND INFO
+                ================================================= */}
 
                 <div className="min-w-0 flex-1">
 
@@ -220,7 +238,7 @@ const ChatSidebar = ({
                   </h3>
 
                   <p className="mt-1 truncate text-sm text-base-content/50">
-                    {friend.email}
+                    {email}
                   </p>
 
                 </div>
@@ -228,6 +246,7 @@ const ChatSidebar = ({
               </button>
             );
           })
+
         )}
 
       </div>

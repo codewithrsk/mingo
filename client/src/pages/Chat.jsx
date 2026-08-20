@@ -1,24 +1,39 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import {
+  FaComments,
+  FaFile,
+  FaTimes,
+} from "react-icons/fa";
 
 import { useAuth } from "../context/AuthContext";
+import api from "../config/Api.config";
 
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageBubble from "../components/chat/MessageBubble";
 import MessageInput from "../components/chat/MessageInput";
 
-import api from "../config/Api.config";
-
 const Chat = () => {
   const { user } = useAuth();
+  const { friendId } = useParams();
+
+  const messagesEndRef = useRef(null);
 
   // =====================================================
-  // STATES
+  // STATE
   // =====================================================
 
   const [users, setUsers] = useState([]);
-  const [selectedFriend, setSelectedFriend] = useState(null);
   const [messages, setMessages] = useState([]);
+
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const [search, setSearch] = useState("");
 
@@ -26,208 +41,248 @@ const Chat = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // =====================================================
-  // REFS - ONLY FOR CHAT SCROLL
+  // FETCH USERS
   // =====================================================
 
-  const messagesContainerRef = useRef(null);
-
-  const messagesEndRef = useRef(null);
-
-  // =====================================================
-  // CURRENT USER
-  // =====================================================
-
-  const currentUserId = user?._id;
-
-  // =====================================================
-  // GET ALL USERS
-  // =====================================================
-
-  const getAllUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoadingUsers(true);
 
       const response = await api.get("/user/allUsers");
 
-      const usersData =
-        response.data?.users || response.data?.data || response.data;
+      const data = response?.data;
 
-      if (Array.isArray(usersData)) {
-        const friends = usersData.filter(
-          (item) => String(item._id) !== String(currentUserId),
-        );
+      const userList =
+        data?.users ||
+        data?.data ||
+        data ||
+        [];
 
-        setUsers(friends);
-      } else {
-        setUsers([]);
-      }
+      setUsers(
+        Array.isArray(userList)
+          ? userList
+          : []
+      );
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error(
+        "Error fetching users:",
+        error
+      );
 
-      setUsers([]);
+      toast.error("Unable to load users");
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, []);
 
   // =====================================================
-  // CHECK IF USER IS NEAR BOTTOM
+  // SELECT USER FROM URL
   // =====================================================
 
-  const isNearBottom = () => {
-    const container = messagesContainerRef.current;
-
-    if (!container) {
-      return true;
+  useEffect(() => {
+    if (!users.length) {
+      return;
     }
 
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (friendId) {
+      const foundUser = users.find(
+        (item) =>
+          item?._id === friendId ||
+          item?.id === friendId
+      );
 
-    return distanceFromBottom < 150;
-  };
+      if (foundUser) {
+        setSelectedUser(foundUser);
+      }
+
+      return;
+    }
+
+    // Select first user when no friendId exists
+    if (!selectedUser) {
+      const firstUser = users.find(
+        (item) =>
+          item?._id !== user?._id &&
+          item?.id !== user?.id
+      );
+
+      if (firstUser) {
+        setSelectedUser(firstUser);
+      }
+    }
+  }, [
+    users,
+    friendId,
+    selectedUser,
+    user?._id,
+    user?.id,
+  ]);
+
+  // =====================================================
+  // FETCH MESSAGES
+  // =====================================================
+
+  const fetchChatData = useCallback(async () => {
+    const currentFriendId =
+      friendId ||
+      selectedUser?._id ||
+      selectedUser?.id;
+
+    if (!currentFriendId) {
+      setMessages([]);
+      return;
+    }
+
+    try {
+      setLoadingMessages(true);
+
+      const response = await api.get(
+        `/user/get-messages/${currentFriendId}`
+      );
+
+      const data = response?.data;
+
+      const messageList =
+        data?.messages ||
+        data?.data ||
+        data ||
+        [];
+
+      setMessages(
+        Array.isArray(messageList)
+          ? messageList
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "Error fetching messages:",
+        error
+      );
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, [
+    friendId,
+    selectedUser?._id,
+    selectedUser?.id,
+  ]);
+
+  // =====================================================
+  // INITIAL FETCH
+  // =====================================================
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // =====================================================
+  // FETCH CHAT + POLLING
+  // =====================================================
+
+  useEffect(() => {
+    fetchChatData();
+
+    const interval = setInterval(() => {
+      fetchChatData();
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchChatData]);
 
   // =====================================================
   // SCROLL TO BOTTOM
   // =====================================================
 
-  const scrollToBottom = (behavior = "smooth") => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior,
-      block: "end",
-    });
-  };
-
-  // =====================================================
-  // GET MESSAGES
-  // ONLY FUNCTION THAT CALLS GET-MESSAGES API
-  // =====================================================
-
-  const fetchChatData = async () => {
-    if (!selectedFriend?._id) {
-      return;
-    }
-
-    try {
-      const shouldScroll = isNearBottom();
-
-      const friendId = selectedFriend._id;
-
-      const response = await api.get(`/user/get-messages/${friendId}`);
-
-      const messagesData =
-        response.data?.messages || response.data?.data || response.data;
-
-      if (Array.isArray(messagesData)) {
-        setMessages(messagesData);
-
-        // Don't disturb the user if they are
-        // reading old messages.
-        if (shouldScroll) {
-          setTimeout(() => {
-            scrollToBottom("smooth");
-          }, 50);
-        }
-      } else {
-        setMessages([]);
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
-  };
-
-  // =====================================================
-  // GET USERS WHEN PAGE LOADS
-  // =====================================================
-
   useEffect(() => {
-    if (!currentUserId) {
-      return;
-    }
-
-    getAllUsers();
-  }, [currentUserId]);
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   // =====================================================
   // SELECT FRIEND
   // =====================================================
 
   const handleSelectFriend = (friend) => {
-    setSelectedFriend(friend);
-
-    // Remove previous friend's messages
+    setSelectedUser(friend);
     setMessages([]);
-
-    // Mobile
-    setShowSidebar(false);
+    setSelectedFile(null);
   };
 
   // =====================================================
-  // FETCH MESSAGES WHEN FRIEND CHANGES
+  // FILE SELECT
   // =====================================================
 
-  useEffect(() => {
-    if (!selectedFriend?._id) {
+  const handleFileSelect = (file) => {
+    if (!file) {
       return;
     }
 
-    setLoadingMessages(true);
+    setSelectedFile(file);
+  };
 
-    // Fetch immediately
-    fetchChatData().finally(() => {
-      setLoadingMessages(false);
+  // =====================================================
+  // REMOVE FILE
+  // =====================================================
 
-      // When opening a friend, always show
-      // the latest message.
-      setTimeout(() => {
-        scrollToBottom("auto");
-      }, 100);
-    });
-
-    // Continue fetching every 2 seconds
-    const interval = setInterval(() => {
-      fetchChatData();
-    }, 2000);
-
-    // Clear old interval when friend changes
-    // or component unmounts
-    return () => {
-      clearInterval(interval);
-    };
-  }, [selectedFriend]);
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+  };
 
   // =====================================================
   // SEND MESSAGE
   // =====================================================
 
-  const handleSendMessage = async (message) => {
-    if (!selectedFriend?._id || !message.trim() || sending) {
+  const handleSendMessage = async (text) => {
+    const currentFriendId =
+      friendId ||
+      selectedUser?._id ||
+      selectedUser?.id;
+
+    if (!text?.trim()) {
+      return false;
+    }
+
+    if (!currentFriendId) {
+      toast.error("Please select a user");
+      return false;
+    }
+
+    if (sending) {
       return false;
     }
 
     try {
       setSending(true);
 
-      await api.post("/user/send-message", {
-        receiverID: selectedFriend._id,
+      await api.post(
+        "/user/send-message",
+        {
+          receiverId: currentFriendId,
+          message: text.trim(),
+        }
+      );
 
-        message: message.trim(),
-      });
-
-      // Get updated messages
       await fetchChatData();
 
-      // Always go to latest message
-      setTimeout(() => {
-        scrollToBottom("smooth");
-      }, 100);
+      setSelectedFile(null);
 
       return true;
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error(
+        "Error sending message:",
+        error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+          "Unable to send message"
+      );
 
       return false;
     } finally {
@@ -236,64 +291,61 @@ const Chat = () => {
   };
 
   // =====================================================
+  // CURRENT USER ID
+  // =====================================================
+
+  const currentUserId =
+    user?._id ||
+    user?.id;
+
+  // =====================================================
   // RENDER
   // =====================================================
 
   return (
-    <div className="h-[91vh] w-full overflow-hidden bg-base-200 text-base-content">
-      <div className="flex h-full">
+    <div className="h-[91vh] overflow-hidden bg-base-200">
+      <div className="mx-auto flex h-full max-w-[1600px] overflow-hidden border-x border-base-300 bg-base-100">
+
         {/* =================================================
             SIDEBAR
         ================================================= */}
 
-        <div
-          className={`
-            h-full
-            w-full
-            ${showSidebar ? "flex" : "hidden"}
-            md:flex
-            md:w-auto
-          `}
-        >
-          <ChatSidebar
-            users={users}
-            selectedFriend={selectedFriend}
-            onSelectFriend={handleSelectFriend}
-            search={search}
-            setSearch={setSearch}
-            loading={loadingUsers}
-          />
-        </div>
+        <ChatSidebar
+          users={users}
+          selectedFriend={selectedUser}
+          onSelectFriend={handleSelectFriend}
+          search={search}
+          setSearch={setSearch}
+          loading={loadingUsers}
+        />
 
         {/* =================================================
             CHAT AREA
         ================================================= */}
 
-        <main
-          className={`
-            h-full
-            min-w-0
-            flex-1
-            flex-col
-            ${showSidebar ? "hidden md:flex" : "flex"}
-          `}
-        >
+        <div className="flex min-w-0 flex-1 flex-col">
+
           {/* =================================================
-              NO FRIEND SELECTED
+              NO USER SELECTED
           ================================================= */}
 
-          {!selectedFriend ? (
-            <div className="flex h-full flex-1 items-center justify-center bg-base-200">
-              <div className="px-6 text-center">
-                <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-primary text-4xl font-bold text-primary-content shadow-lg">
-                  M
+          {!selectedUser ? (
+            <div className="flex flex-1 items-center justify-center bg-base-100 px-6">
+              <div className="max-w-sm text-center">
+
+                <div className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <FaComments className="text-3xl" />
                 </div>
 
-                <h1 className="text-2xl font-bold">Welcome to Mingo</h1>
+                <h2 className="text-xl font-bold">
+                  Welcome to Mingo
+                </h2>
 
-                <p className="mx-auto mt-2 max-w-md text-base-content/50">
-                  Select a friend from the sidebar to start chatting.
+                <p className="mt-2 text-sm text-base-content/60">
+                  Select a conversation to start
+                  chatting.
                 </p>
+
               </div>
             </div>
           ) : (
@@ -303,71 +355,123 @@ const Chat = () => {
               ================================================= */}
 
               <ChatHeader
-                friend={selectedFriend}
-                onBack={() => setShowSidebar(true)}
+                user={selectedUser}
               />
 
               {/* =================================================
                   MESSAGES
               ================================================= */}
 
-              <div
-                ref={messagesContainerRef}
-                className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8"
-              >
-                {loadingMessages ? (
-                  <div className="flex h-full items-center justify-center">
-                    <span className="loading loading-spinner loading-lg text-primary" />
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center text-center">
-                    <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-3xl">
-                      👋
+              <div className="min-h-0 flex-1 overflow-y-auto bg-base-200/40 px-3 py-4 md:px-6">
+                <div className="mx-auto flex max-w-4xl flex-col gap-2">
+
+                  {loadingMessages &&
+                  messages.length === 0 ? (
+                    <div className="flex items-center justify-center py-10">
+                      <span className="loading loading-spinner loading-md text-primary" />
                     </div>
+                  ) : messages.length === 0 ? (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="text-center">
 
-                    <h2 className="text-xl font-bold">Start a conversation</h2>
+                        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <FaComments className="text-2xl" />
+                        </div>
 
-                    <p className="mt-2 max-w-sm text-sm text-base-content/50">
-                      No messages yet with{" "}
-                      <span className="font-semibold text-base-content">
-                        {selectedFriend.fullName}
-                      </span>
-                      .
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mb-6 flex justify-center">
-                      <span className="rounded-full bg-base-100 px-4 py-1.5 text-xs text-base-content/50 shadow-sm">
-                        Today
-                      </span>
+                        <h3 className="font-semibold">
+                          No messages yet
+                        </h3>
+
+                        <p className="mt-1 text-sm text-base-content/60">
+                          Start the conversation with{" "}
+                          {selectedUser?.fullName ||
+                            "this user"}
+                          .
+                        </p>
+
+                      </div>
                     </div>
-
-                    <div className="mx-auto max-w-4xl space-y-3">
-                      {messages.map((message, index) => (
+                  ) : (
+                    messages.map(
+                      (message, index) => (
                         <MessageBubble
-                          key={message._id || index}
+                          key={
+                            message?._id ||
+                            message?.id ||
+                            index
+                          }
                           message={message}
-                          currentUserId={currentUserId}
+                          currentUserId={
+                            currentUserId
+                          }
+                          user={user}
                         />
-                      ))}
+                      )
+                    )
+                  )}
 
-                      {/* Bottom of messages */}
+                  <div ref={messagesEndRef} />
 
-                      <div ref={messagesEndRef} />
-                    </div>
-                  </>
-                )}
+                </div>
               </div>
+
+              {/* =================================================
+                  SELECTED FILE
+              ================================================= */}
+
+              {selectedFile && (
+                <div className="border-t border-base-300 bg-base-100 px-3 pt-2 md:px-6">
+                  <div className="mx-auto flex max-w-4xl items-center gap-3 rounded-xl border border-base-300 bg-base-200 px-3 py-2">
+
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <FaFile />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {selectedFile.name}
+                      </p>
+
+                      <p className="text-xs text-base-content/50">
+                        {(
+                          selectedFile.size /
+                          1024 /
+                          1024
+                        ).toFixed(2)}{" "}
+                        MB
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={
+                        handleRemoveFile
+                      }
+                      className="btn btn-ghost btn-circle btn-sm"
+                      title="Remove file"
+                    >
+                      <FaTimes />
+                    </button>
+
+                  </div>
+                </div>
+              )}
 
               {/* =================================================
                   MESSAGE INPUT
               ================================================= */}
 
-              <MessageInput onSend={handleSendMessage} sending={sending} />
+              <MessageInput
+                onSend={handleSendMessage}
+                sending={sending}
+                onFileSelect={
+                  handleFileSelect
+                }
+              />
+
             </>
           )}
-        </main>
+        </div>
       </div>
     </div>
   );

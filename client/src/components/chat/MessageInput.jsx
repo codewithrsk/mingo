@@ -1,11 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import {
+  FaPaperclip,
+  FaSmile,
+  FaPaperPlane,
+} from "react-icons/fa";
 
 const MessageInput = ({
   onSend,
   sending,
+  onFileSelect,
 }) => {
-  const [message, setMessage] =
-    useState("");
+  const [message, setMessage] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const fileInputRef = useRef(null);
+
+  // =====================================================
+  // CLEANUP IMAGE PREVIEW
+  // =====================================================
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   // =====================================================
   // SEND
@@ -14,15 +36,29 @@ const MessageInput = ({
   const handleSend = async () => {
     const text = message.trim();
 
-    if (!text || sending) {
+    // Allow sending when either text OR file exists
+    if ((!text && !selectedFile) || sending) {
       return;
     }
 
-    const success =
-      await onSend(text);
+    const success = await onSend(
+      text,
+      selectedFile
+    );
 
     if (success) {
       setMessage("");
+      setSelectedFile(null);
+
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+
+      setImagePreview(null);
+
+      if (onFileSelect) {
+        onFileSelect(null);
+      }
     }
   };
 
@@ -41,96 +77,199 @@ const MessageInput = ({
     }
   };
 
+  // =====================================================
+  // FILE SELECT
+  // =====================================================
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Remove previous preview URL
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setSelectedFile(file);
+
+    // Image preview
+    if (file.type.startsWith("image/")) {
+      const preview =
+        URL.createObjectURL(file);
+
+      setImagePreview(preview);
+    } else {
+      setImagePreview(null);
+    }
+
+    if (onFileSelect) {
+      onFileSelect(file);
+    }
+
+    // Allow selecting the same file again
+    event.target.value = "";
+  };
+
+  // =====================================================
+  // SEND BUTTON STATE
+  // =====================================================
+
+  const canSend =
+    !sending &&
+    (message.trim().length > 0 ||
+      selectedFile !== null);
+
   return (
     <div className="shrink-0 border-t border-base-300 bg-base-100 px-3 py-3 md:px-6">
 
-      <div className="mx-auto flex max-w-4xl items-end gap-2">
+      <div className="mx-auto max-w-4xl">
 
         {/* =================================================
-            ATTACHMENT
+            MESSAGE COMPOSER
         ================================================= */}
 
-        <button
-          type="button"
-          className="btn btn-ghost btn-circle shrink-0"
-          title="Attach"
-        >
-          📎
-        </button>
+        <div className="flex items-end gap-2">
 
-        {/* =================================================
-            MESSAGE INPUT
-        ================================================= */}
-
-        <div className="relative flex-1">
-
-          <textarea
-            rows="1"
-            value={message}
-            disabled={sending}
-            onChange={(event) =>
-              setMessage(event.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            className="
-              textarea
-              textarea-bordered
-              min-h-[48px]
-              max-h-32
-              w-full
-              resize-none
-              rounded-2xl
-              bg-base-200
-              pr-12
-              focus:border-primary
-              focus:outline-none
-            "
-          />
-
-          {/* Emoji */}
+          {/* =================================================
+              ATTACHMENT
+          ================================================= */}
 
           <button
             type="button"
-            className="
-              btn
-              btn-ghost
-              btn-circle
-              btn-sm
-              absolute
-              bottom-2
-              right-2
-            "
-            title="Emoji"
+            onClick={() =>
+              fileInputRef.current?.click()
+            }
+            disabled={sending}
+            className="btn btn-ghost btn-circle shrink-0"
+            title="Attach file"
           >
-            😊
+            <FaPaperclip />
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*,.pdf,.doc,.docx,.txt"
+            onChange={handleFileChange}
+          />
+
+          {/* =================================================
+              MESSAGE AREA
+          ================================================= */}
+
+          <div className="relative flex-1">
+
+            {/* =================================================
+                IMAGE PREVIEW
+            ================================================= */}
+
+            {imagePreview && (
+              <div className="absolute bottom-full left-0 mb-2">
+
+                <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-200 shadow-lg">
+
+                  <img
+                    src={imagePreview}
+                    alt="Selected"
+                    className="
+                      block
+                      max-h-40
+                      max-w-[220px]
+                      object-cover
+                    "
+                  />
+
+                </div>
+
+              </div>
+            )}
+
+            {/* =================================================
+                TEXTAREA
+            ================================================= */}
+
+            <textarea
+              rows="1"
+              value={message}
+              disabled={sending}
+              onChange={(event) =>
+                setMessage(
+                  event.target.value
+                )
+              }
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message..."
+              className="
+                textarea
+                textarea-bordered
+                min-h-[48px]
+                max-h-32
+                w-full
+                resize-none
+                rounded-2xl
+                bg-base-200
+                pr-12
+                focus:border-primary
+                focus:outline-none
+              "
+            />
+
+            {/* =================================================
+                EMOJI
+            ================================================= */}
+
+            <button
+              type="button"
+              disabled={sending}
+              className="
+                btn
+                btn-ghost
+                btn-circle
+                btn-sm
+                absolute
+                bottom-2
+                right-2
+              "
+              title="Emoji"
+            >
+              <FaSmile />
+            </button>
+
+          </div>
+
+          {/* =================================================
+              SEND
+          ================================================= */}
+
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!canSend}
+            className={`
+              btn
+              btn-circle
+              shrink-0
+              ${
+                canSend
+                  ? "btn-primary"
+                  : "btn-disabled"
+              }
+            `}
+            title="Send"
+          >
+            {sending ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              <FaPaperPlane />
+            )}
           </button>
 
         </div>
-
-        {/* =================================================
-            SEND BUTTON
-        ================================================= */}
-
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={
-            sending ||
-            !message.trim()
-          }
-          className="btn btn-primary btn-circle shrink-0"
-          title="Send"
-        >
-          {sending ? (
-            <span className="loading loading-spinner loading-sm" />
-          ) : (
-            "➤"
-          )}
-        </button>
-
       </div>
-
     </div>
   );
 };
