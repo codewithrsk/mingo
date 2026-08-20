@@ -1,4 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   FaPaperclip,
@@ -9,64 +13,131 @@ import {
 const MessageInput = ({
   onSend,
   sending,
-  onFileSelect,
 }) => {
-  const [message, setMessage] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [message, setMessage] =
+    useState("");
 
-  const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] =
+    useState(null);
+
+  const [imagePreview, setImagePreview] =
+    useState(null);
+
+  const fileInputRef =
+    useRef(null);
 
   // =====================================================
-  // CLEANUP IMAGE PREVIEW
+  // CLEANUP
   // =====================================================
 
   useEffect(() => {
     return () => {
       if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
+        URL.revokeObjectURL(
+          imagePreview
+        );
       }
     };
   }, [imagePreview]);
+
+  // =====================================================
+  // FILE SELECT
+  // =====================================================
+
+  const handleFileChange = (event) => {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (imagePreview) {
+      URL.revokeObjectURL(
+        imagePreview
+      );
+    }
+
+    setSelectedFile(file);
+
+    if (
+      file.type.startsWith(
+        "image/"
+      )
+    ) {
+      const preview =
+        URL.createObjectURL(file);
+
+      setImagePreview(preview);
+    } else {
+      setImagePreview(null);
+    }
+
+    event.target.value = "";
+  };
+
+  // =====================================================
+  // REMOVE FILE
+  // =====================================================
+
+  const handleRemoveFile = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(
+        imagePreview
+      );
+    }
+
+    setImagePreview(null);
+    setSelectedFile(null);
+  };
 
   // =====================================================
   // SEND
   // =====================================================
 
   const handleSend = async () => {
-    const text = message.trim();
+    const text =
+      message.trim();
 
-    // Allow sending when either text OR file exists
-    if ((!text && !selectedFile) || sending) {
+    if (
+      (!text && !selectedFile) ||
+      sending
+    ) {
       return;
     }
 
-    const success = await onSend(
-      text,
-      selectedFile
-    );
+    /*
+     * For now the confirmed backend API
+     * sends text messages.
+     */
+
+    const success =
+      await onSend(
+        text,
+        selectedFile
+      );
 
     if (success) {
       setMessage("");
-      setSelectedFile(null);
 
       if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
+        URL.revokeObjectURL(
+          imagePreview
+        );
       }
 
       setImagePreview(null);
-
-      if (onFileSelect) {
-        onFileSelect(null);
-      }
+      setSelectedFile(null);
     }
   };
 
   // =====================================================
-  // ENTER TO SEND
+  // ENTER
   // =====================================================
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (
+    event
+  ) => {
     if (
       event.key === "Enter" &&
       !event.shiftKey
@@ -78,49 +149,19 @@ const MessageInput = ({
   };
 
   // =====================================================
-  // FILE SELECT
-  // =====================================================
-
-  const handleFileChange = (event) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    // Remove previous preview URL
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-    }
-
-    setSelectedFile(file);
-
-    // Image preview
-    if (file.type.startsWith("image/")) {
-      const preview =
-        URL.createObjectURL(file);
-
-      setImagePreview(preview);
-    } else {
-      setImagePreview(null);
-    }
-
-    if (onFileSelect) {
-      onFileSelect(file);
-    }
-
-    // Allow selecting the same file again
-    event.target.value = "";
-  };
-
-  // =====================================================
-  // SEND BUTTON STATE
+  // SEND BUTTON
   // =====================================================
 
   const canSend =
     !sending &&
-    (message.trim().length > 0 ||
-      selectedFile !== null);
+    (
+      message.trim().length > 0 ||
+      selectedFile !== null
+    );
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="shrink-0 border-t border-base-300 bg-base-100 px-3 py-3 md:px-6">
@@ -128,14 +169,12 @@ const MessageInput = ({
       <div className="mx-auto max-w-4xl">
 
         {/* =================================================
-            MESSAGE COMPOSER
+            COMPOSER
         ================================================= */}
 
         <div className="flex items-end gap-2">
 
-          {/* =================================================
-              ATTACHMENT
-          ================================================= */}
+          {/* ATTACH */}
 
           <button
             type="button"
@@ -154,18 +193,16 @@ const MessageInput = ({
             type="file"
             className="hidden"
             accept="image/*,.pdf,.doc,.docx,.txt"
-            onChange={handleFileChange}
+            onChange={
+              handleFileChange
+            }
           />
 
-          {/* =================================================
-              MESSAGE AREA
-          ================================================= */}
+          {/* MESSAGE BOX */}
 
           <div className="relative flex-1">
 
-            {/* =================================================
-                IMAGE PREVIEW
-            ================================================= */}
+            {/* IMAGE PREVIEW */}
 
             {imagePreview && (
               <div className="absolute bottom-full left-0 mb-2">
@@ -174,13 +211,8 @@ const MessageInput = ({
 
                   <img
                     src={imagePreview}
-                    alt="Selected"
-                    className="
-                      block
-                      max-h-40
-                      max-w-[220px]
-                      object-cover
-                    "
+                    alt="Preview"
+                    className="block max-h-40 max-w-[220px] object-cover"
                   />
 
                 </div>
@@ -188,9 +220,7 @@ const MessageInput = ({
               </div>
             )}
 
-            {/* =================================================
-                TEXTAREA
-            ================================================= */}
+            {/* TEXT */}
 
             <textarea
               rows="1"
@@ -201,7 +231,9 @@ const MessageInput = ({
                   event.target.value
                 )
               }
-              onKeyDown={handleKeyDown}
+              onKeyDown={
+                handleKeyDown
+              }
               placeholder="Type a message..."
               className="
                 textarea
@@ -218,9 +250,7 @@ const MessageInput = ({
               "
             />
 
-            {/* =================================================
-                EMOJI
-            ================================================= */}
+            {/* EMOJI */}
 
             <button
               type="button"
@@ -241,24 +271,19 @@ const MessageInput = ({
 
           </div>
 
-          {/* =================================================
-              SEND
-          ================================================= */}
+          {/* SEND */}
 
           <button
             type="button"
-            onClick={handleSend}
+            onClick={
+              handleSend
+            }
             disabled={!canSend}
-            className={`
-              btn
-              btn-circle
-              shrink-0
-              ${
-                canSend
-                  ? "btn-primary"
-                  : "btn-disabled"
-              }
-            `}
+            className={`btn btn-circle shrink-0 ${
+              canSend
+                ? "btn-primary"
+                : "btn-disabled"
+            }`}
             title="Send"
           >
             {sending ? (

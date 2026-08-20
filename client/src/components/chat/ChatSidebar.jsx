@@ -14,27 +14,33 @@ const ChatSidebar = ({
   loading,
 }) => {
   // =====================================================
-  // FILTER USERS
+  // FILTER
   // =====================================================
 
-  const filteredUsers = users.filter((user) => {
-    const name =
-      user?.fullName || "";
+  const filteredUsers = users.filter(
+    (user) => {
+      const name =
+        user?.fullName || "";
 
-    const email =
-      user?.email || "";
+      const email =
+        user?.email || "";
 
-    const query =
-      search?.toLowerCase() || "";
+      const query =
+        search?.toLowerCase() || "";
 
-    return (
-      name.toLowerCase().includes(query) ||
-      email.toLowerCase().includes(query)
-    );
-  });
+      return (
+        name
+          .toLowerCase()
+          .includes(query) ||
+        email
+          .toLowerCase()
+          .includes(query)
+      );
+    }
+  );
 
   // =====================================================
-  // GET INITIALS
+  // INITIALS
   // =====================================================
 
   const getInitials = (user) => {
@@ -44,7 +50,9 @@ const ChatSidebar = ({
     return name
       .split(" ")
       .filter(Boolean)
-      .map((word) => word[0])
+      .map(
+        (word) => word[0]
+      )
       .join("")
       .slice(0, 2)
       .toUpperCase();
@@ -77,9 +85,7 @@ const ChatSidebar = ({
 
         </div>
 
-        {/* =================================================
-            SEARCH
-        ================================================= */}
+        {/* SEARCH */}
 
         <label className="input input-bordered flex w-full items-center gap-3 bg-base-200">
 
@@ -118,7 +124,8 @@ const ChatSidebar = ({
 
           </div>
 
-        ) : filteredUsers.length === 0 ? (
+        ) : filteredUsers.length ===
+          0 ? (
 
           <div className="flex h-48 flex-col items-center justify-center text-center">
 
@@ -139,113 +146,111 @@ const ChatSidebar = ({
 
         ) : (
 
-          filteredUsers.map((friend) => {
+          filteredUsers.map(
+            (friend) => {
 
-            const isSelected =
-              selectedFriend?._id ===
-              friend?._id;
+              const isSelected =
+                selectedFriend?._id ===
+                friend?._id;
 
-            const name =
-              friend?.fullName ||
-              "User";
+              const name =
+                friend?.fullName ||
+                "User";
 
-            const email =
-              friend?.email ||
-              "";
+              const email =
+                friend?.email ||
+                "";
 
-            const photo =
-              friend?.photo?.url;
+              const photo =
+                friend?.photo?.url;
 
-            return (
-              <button
-                key={
-                  friend?._id ||
-                  friend?.id
-                }
-                type="button"
-                onClick={() =>
-                  onSelectFriend?.(
-                    friend
-                  )
-                }
-                className={`
-                  mb-1
-                  flex
-                  w-full
-                  items-center
-                  gap-3
-                  rounded-2xl
-                  p-3
-                  text-left
-                  transition-all
-                  ${
-                    isSelected
-                      ? "bg-primary/10"
-                      : "hover:bg-base-200"
+              return (
+                <button
+                  key={
+                    friend?._id ||
+                    friend?.id
                   }
-                `}
-              >
+                  type="button"
+                  onClick={() =>
+                    onSelectFriend?.(
+                      friend
+                    )
+                  }
+                  className={`
+                    mb-1
+                    flex
+                    w-full
+                    items-center
+                    gap-3
+                    rounded-2xl
+                    p-3
+                    text-left
+                    transition-all
+                    ${
+                      isSelected
+                        ? "bg-primary/10"
+                        : "hover:bg-base-200"
+                    }
+                  `}
+                >
 
-                {/* =================================================
-                    AVATAR
-                ================================================= */}
+                  {/* AVATAR */}
 
-                <div className="shrink-0">
+                  <div className="shrink-0">
 
-                  {photo ? (
+                    {photo ? (
 
-                    <img
-                      src={photo}
-                      alt={name}
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
+                      <img
+                        src={photo}
+                        alt={name}
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
 
-                  ) : (
+                    ) : (
 
-                    <div
-                      className={`
-                        flex
-                        h-12
-                        w-12
-                        items-center
-                        justify-center
-                        rounded-full
-                        font-semibold
-                        ${
-                          isSelected
-                            ? "bg-primary text-primary-content"
-                            : "bg-base-300"
-                        }
-                      `}
-                    >
-                      {getInitials(
-                        friend
-                      )}
-                    </div>
+                      <div
+                        className={`
+                          flex
+                          h-12
+                          w-12
+                          items-center
+                          justify-center
+                          rounded-full
+                          font-semibold
+                          ${
+                            isSelected
+                              ? "bg-primary text-primary-content"
+                              : "bg-base-300"
+                          }
+                        `}
+                      >
+                        {getInitials(
+                          friend
+                        )}
+                      </div>
 
-                  )}
+                    )}
 
-                </div>
+                  </div>
 
-                {/* =================================================
-                    FRIEND INFO
-                ================================================= */}
+                  {/* INFO */}
 
-                <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1">
 
-                  <h3 className="truncate font-semibold">
-                    {name}
-                  </h3>
+                    <h3 className="truncate font-semibold">
+                      {name}
+                    </h3>
 
-                  <p className="mt-1 truncate text-sm text-base-content/50">
-                    {email}
-                  </p>
+                    <p className="mt-1 truncate text-sm text-base-content/50">
+                      {email}
+                    </p>
 
-                </div>
+                  </div>
 
-              </button>
-            );
-          })
+                </button>
+              );
+            }
+          )
 
         )}
 

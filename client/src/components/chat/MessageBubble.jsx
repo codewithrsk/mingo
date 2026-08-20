@@ -1,70 +1,107 @@
 import React from "react";
 
+import {
+  FaCheck,
+  FaCheckDouble,
+} from "react-icons/fa";
+
 const MessageBubble = ({
   message,
   currentUserId,
 }) => {
   // =====================================================
-  // GET SENDER ID
+  // MESSAGE ID
   // =====================================================
 
   const senderId =
     message?.senderId?._id ||
-    message?.senderId;
+    message?.senderId ||
+    message?.sender?._id ||
+    message?.sender?.id ||
+    message?.sender ||
+    "";
 
-  // =====================================================
-  // CHECK WHETHER MESSAGE IS MINE
-  // =====================================================
+  const normalizedCurrentUserId =
+    currentUserId?.toString();
+
+  const normalizedSenderId =
+    senderId?.toString();
 
   const isMine =
-    String(senderId) ===
-    String(currentUserId);
+    normalizedSenderId ===
+    normalizedCurrentUserId;
 
   // =====================================================
-  // FORMAT TIME
+  // MESSAGE TEXT
   // =====================================================
 
-  const messageTime = message?.createdAt
+  const text =
+    message?.message ||
+    message?.text ||
+    message?.content ||
+    "";
+
+  // =====================================================
+  // TIME
+  // =====================================================
+
+  const messageDate =
+    message?.createdAt ||
+    message?.timestamp;
+
+  const formattedTime = messageDate
     ? new Date(
-        message.createdAt
-      ).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+        messageDate
+      ).toLocaleTimeString(
+        "en-IN",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      )
     : "";
+
+  // =====================================================
+  // STATUS
+  // =====================================================
+
+  const isRead =
+    message?.isRead ||
+    message?.read ||
+    message?.seen;
 
   return (
     <div
-      className={`flex ${
+      className={`flex w-full ${
         isMine
           ? "justify-end"
           : "justify-start"
       }`}
     >
-
       <div
         className={`
-          max-w-[80%]
+          max-w-[75%]
           rounded-2xl
           px-4
-          py-3
+          py-2.5
           shadow-sm
-          md:max-w-[65%]
           ${
             isMine
               ? "rounded-br-md bg-primary text-primary-content"
-              : "rounded-bl-md bg-base-100"
+              : "rounded-bl-md bg-base-100 text-base-content border border-base-300"
           }
         `}
       >
 
-        {/* Message */}
+        {/* MESSAGE */}
 
-        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed md:text-[15px]">
-          {message?.message}
-        </p>
+        {text && (
+          <p className="whitespace-pre-wrap break-words text-sm">
+            {text}
+          </p>
+        )}
 
-        {/* Time */}
+        {/* TIME */}
 
         <div
           className={`
@@ -76,28 +113,24 @@ const MessageBubble = ({
             text-[10px]
             ${
               isMine
-                ? "text-primary-content/60"
+                ? "text-primary-content/70"
                 : "text-base-content/40"
             }
           `}
         >
-
           <span>
-            {messageTime}
+            {formattedTime}
           </span>
 
-          {/* Sent check */}
-
-          {isMine && (
-            <span className="text-sm">
-              ✓
-            </span>
-          )}
-
+          {isMine &&
+            (isRead ? (
+              <FaCheckDouble />
+            ) : (
+              <FaCheck />
+            ))}
         </div>
 
       </div>
-
     </div>
   );
 };

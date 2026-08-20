@@ -6,11 +6,7 @@ import React, {
 } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import {
-  FaComments,
-  FaFile,
-  FaTimes,
-} from "react-icons/fa";
+import { FaComments } from "react-icons/fa";
 
 import { useAuth } from "../context/AuthContext";
 import api from "../config/Api.config";
@@ -41,8 +37,6 @@ const Chat = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
 
-  const [selectedFile, setSelectedFile] = useState(null);
-
   // =====================================================
   // FETCH USERS
   // =====================================================
@@ -53,7 +47,9 @@ const Chat = () => {
 
       const response = await api.get("/user/allUsers");
 
-      const data = response?.data;
+      console.log("USERS RESPONSE:", response.data);
+
+      const data = response.data;
 
       const userList =
         data?.users ||
@@ -68,8 +64,8 @@ const Chat = () => {
       );
     } catch (error) {
       console.error(
-        "Error fetching users:",
-        error
+        "FETCH USERS ERROR:",
+        error?.response?.data || error
       );
 
       toast.error("Unable to load users");
@@ -79,7 +75,7 @@ const Chat = () => {
   }, []);
 
   // =====================================================
-  // SELECT USER FROM URL
+  // SELECT USER
   // =====================================================
 
   useEffect(() => {
@@ -87,6 +83,7 @@ const Chat = () => {
       return;
     }
 
+    // If friendId exists in URL
     if (friendId) {
       const foundUser = users.find(
         (item) =>
@@ -101,7 +98,7 @@ const Chat = () => {
       return;
     }
 
-    // Select first user when no friendId exists
+    // Otherwise select first user except current user
     if (!selectedUser) {
       const firstUser = users.find(
         (item) =>
@@ -139,28 +136,63 @@ const Chat = () => {
     try {
       setLoadingMessages(true);
 
+      /*
+       * IMPORTANT:
+       * This is the GET endpoint used for loading
+       * messages of the selected friend.
+       */
       const response = await api.get(
         `/user/get-messages/${currentFriendId}`
       );
 
-      const data = response?.data;
-
-      const messageList =
-        data?.messages ||
-        data?.data ||
-        data ||
-        [];
-
-      setMessages(
-        Array.isArray(messageList)
-          ? messageList
-          : []
+      console.log(
+        "MESSAGE RESPONSE:",
+        response.data
       );
+
+      const data = response.data;
+
+      /*
+       * Supports common response structures:
+       *
+       * {
+       *   messages: [...]
+       * }
+       *
+       * {
+       *   data: [...]
+       * }
+       *
+       * [...]
+       */
+
+      let messageList = [];
+
+      if (Array.isArray(data)) {
+        messageList = data;
+      } else if (
+        Array.isArray(data?.messages)
+      ) {
+        messageList = data.messages;
+      } else if (
+        Array.isArray(data?.data)
+      ) {
+        messageList = data.data;
+      }
+
+      console.log(
+        "MESSAGE LIST:",
+        messageList
+      );
+
+      setMessages(messageList);
     } catch (error) {
       console.error(
-        "Error fetching messages:",
-        error
+        "FETCH MESSAGE ERROR:",
+        error?.response?.data || error
       );
+
+      setMessages([]);
     } finally {
       setLoadingMessages(false);
     }
@@ -171,7 +203,7 @@ const Chat = () => {
   ]);
 
   // =====================================================
-  // INITIAL FETCH
+  // INITIAL USERS
   // =====================================================
 
   useEffect(() => {
@@ -179,10 +211,14 @@ const Chat = () => {
   }, [fetchUsers]);
 
   // =====================================================
-  // FETCH CHAT + POLLING
+  // FETCH MESSAGES
   // =====================================================
 
   useEffect(() => {
+    if (!selectedUser && !friendId) {
+      return;
+    }
+
     fetchChatData();
 
     const interval = setInterval(() => {
@@ -192,7 +228,11 @@ const Chat = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [fetchChatData]);
+  }, [
+    fetchChatData,
+    selectedUser,
+    friendId,
+  ]);
 
   // =====================================================
   // SCROLL TO BOTTOM
@@ -210,46 +250,30 @@ const Chat = () => {
 
   const handleSelectFriend = (friend) => {
     setSelectedUser(friend);
+
+    // Immediately clear old conversation
     setMessages([]);
-    setSelectedFile(null);
-  };
-
-  // =====================================================
-  // FILE SELECT
-  // =====================================================
-
-  const handleFileSelect = (file) => {
-    if (!file) {
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
-  // =====================================================
-  // REMOVE FILE
-  // =====================================================
-
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
   };
 
   // =====================================================
   // SEND MESSAGE
   // =====================================================
 
-  const handleSendMessage = async (text) => {
+  const handleSendMessage = async (text, file) => {
     const currentFriendId =
       friendId ||
       selectedUser?._id ||
       selectedUser?.id;
 
-    if (!text?.trim()) {
+    /*
+     * Don't send empty message.
+     */
+    if (!text?.trim() && !file) {
       return false;
     }
 
     if (!currentFriendId) {
-      toast.error("Please select a user");
+      toast.error("Please select a friend");
       return false;
     }
 
@@ -260,23 +284,38 @@ const Chat = () => {
     try {
       setSending(true);
 
-      await api.post(
-        "/user/send-message",
-        {
-          receiverId: currentFriendId,
-          message: text.trim(),
-        }
-      );
+      /*
+       * CURRENT BACKEND API
+       *
+       * POST /user/send-message
+       */
 
+      if (text?.trim()) {
+        await api.post(
+          "/user/send-message",
+          {
+            receiverId: currentFriendId,
+            message: text.trim(),
+          }
+        );
+      }
+
+      /*
+       * File upload is intentionally not sent here yet.
+       *
+       * Your current confirmed API is the text-message
+       * endpoint above. Once your backend file endpoint
+       * is available, it can be connected here.
+       */
+
+      // Immediately fetch latest messages
       await fetchChatData();
-
-      setSelectedFile(null);
 
       return true;
     } catch (error) {
       console.error(
-        "Error sending message:",
-        error
+        "SEND MESSAGE ERROR:",
+        error?.response?.data || error
       );
 
       toast.error(
@@ -289,14 +328,6 @@ const Chat = () => {
       setSending(false);
     }
   };
-
-  // =====================================================
-  // CURRENT USER ID
-  // =====================================================
-
-  const currentUserId =
-    user?._id ||
-    user?.id;
 
   // =====================================================
   // RENDER
@@ -320,18 +351,18 @@ const Chat = () => {
         />
 
         {/* =================================================
-            CHAT AREA
+            CHAT
         ================================================= */}
 
         <div className="flex min-w-0 flex-1 flex-col">
 
           {/* =================================================
-              NO USER SELECTED
+              NO FRIEND SELECTED
           ================================================= */}
 
           {!selectedUser ? (
-            <div className="flex flex-1 items-center justify-center bg-base-100 px-6">
-              <div className="max-w-sm text-center">
+            <div className="flex flex-1 items-center justify-center bg-base-100">
+              <div className="text-center">
 
                 <div className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <FaComments className="text-3xl" />
@@ -342,8 +373,7 @@ const Chat = () => {
                 </h2>
 
                 <p className="mt-2 text-sm text-base-content/60">
-                  Select a conversation to start
-                  chatting.
+                  Select a friend to start chatting.
                 </p>
 
               </div>
@@ -359,18 +389,24 @@ const Chat = () => {
               />
 
               {/* =================================================
-                  MESSAGES
+                  MESSAGE AREA
               ================================================= */}
 
               <div className="min-h-0 flex-1 overflow-y-auto bg-base-200/40 px-3 py-4 md:px-6">
+
                 <div className="mx-auto flex max-w-4xl flex-col gap-2">
+
+                  {/* LOADING */}
 
                   {loadingMessages &&
                   messages.length === 0 ? (
-                    <div className="flex items-center justify-center py-10">
+                    <div className="flex items-center justify-center py-20">
                       <span className="loading loading-spinner loading-md text-primary" />
                     </div>
                   ) : messages.length === 0 ? (
+
+                    /* EMPTY */
+
                     <div className="flex items-center justify-center py-20">
                       <div className="text-center">
 
@@ -383,15 +419,18 @@ const Chat = () => {
                         </h3>
 
                         <p className="mt-1 text-sm text-base-content/60">
-                          Start the conversation with{" "}
+                          Send a message to{" "}
                           {selectedUser?.fullName ||
-                            "this user"}
-                          .
+                            "your friend"}.
                         </p>
 
                       </div>
                     </div>
+
                   ) : (
+
+                    /* MESSAGES */
+
                     messages.map(
                       (message, index) => (
                         <MessageBubble
@@ -402,60 +441,22 @@ const Chat = () => {
                           }
                           message={message}
                           currentUserId={
-                            currentUserId
+                            user?._id ||
+                            user?.id
                           }
                           user={user}
                         />
                       )
                     )
+
                   )}
 
-                  <div ref={messagesEndRef} />
+                  <div
+                    ref={messagesEndRef}
+                  />
 
                 </div>
               </div>
-
-              {/* =================================================
-                  SELECTED FILE
-              ================================================= */}
-
-              {selectedFile && (
-                <div className="border-t border-base-300 bg-base-100 px-3 pt-2 md:px-6">
-                  <div className="mx-auto flex max-w-4xl items-center gap-3 rounded-xl border border-base-300 bg-base-200 px-3 py-2">
-
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <FaFile />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {selectedFile.name}
-                      </p>
-
-                      <p className="text-xs text-base-content/50">
-                        {(
-                          selectedFile.size /
-                          1024 /
-                          1024
-                        ).toFixed(2)}{" "}
-                        MB
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={
-                        handleRemoveFile
-                      }
-                      className="btn btn-ghost btn-circle btn-sm"
-                      title="Remove file"
-                    >
-                      <FaTimes />
-                    </button>
-
-                  </div>
-                </div>
-              )}
 
               {/* =================================================
                   MESSAGE INPUT
@@ -464,9 +465,6 @@ const Chat = () => {
               <MessageInput
                 onSend={handleSendMessage}
                 sending={sending}
-                onFileSelect={
-                  handleFileSelect
-                }
               />
 
             </>
