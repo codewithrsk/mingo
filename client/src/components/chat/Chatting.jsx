@@ -5,10 +5,9 @@ import socketAPI from "../../config/webSocket";
 
 const Chatting = ({ selectedFriend, currentUser }) => {
   const { user } = useAuth();
-  console.log("user",user);
-  console.log("selectedFriend",selectedFriend);
-  
-  
+  console.log("user", user);
+  console.log("selectedFriend", selectedFriend);
+
   const bottomRef = useRef(null);
   const [filteredChatData, setFilteredChatData] = useState([]);
   const [receiver, setReceiver] = useState("");
@@ -119,7 +118,7 @@ const Chatting = ({ selectedFriend, currentUser }) => {
       <div className="flex items-center gap-3 px-5 py-3 bg-base-100 border-b border-base-300 shadow-sm shrink-0">
         <div className="avatar avatar-placeholder">
           <div className="size-10 rounded-full bg-primary text-primary-content font-bold text-sm flex items-center justify-center">
-            {(receiver?.fullName?.[0] || "?").toUpperCase()}
+            <img src={selectedFriend.photo.url} alt="" />
           </div>
         </div>
         <div>
@@ -138,23 +137,18 @@ const Chatting = ({ selectedFriend, currentUser }) => {
         {filteredChatData.map((chat, idx) => (
           <>
             <div
+              key={idx}
               className={`chat ${chat.senderId === user._id ? "chat-sender" : "chat-receiver"} `}
             >
               <div className="chat-avatar avatar">
                 <div className="size-10 rounded-full">
                   {chat.senderId === user._id ? (
                     <>
-                    <img
-                      src={user?.photo?.url}
-                      
-                    />
-                    {/* <a href={user.photo.url}></a> */}
+                      <img src={user?.photo?.url} />
+                      {/* <a href={user.photo.url}></a> */}
                     </>
                   ) : (
-                    <img
-                      src={selectedFriend.photo.url}
-                      alt="avatar"
-                    />
+                    <img src={selectedFriend.photo.url} alt="avatar" />
                   )}
                 </div>
               </div>
@@ -205,7 +199,7 @@ const Chatting = ({ selectedFriend, currentUser }) => {
           😊
         </button>
         <textarea
-          className="textarea textarea-bordered flex-1 resize-none text-sm min-h-[42px] max-h-32 leading-relaxed"
+          className="textarea textarea-bordered flex-1 resize-none text-sm min-h-10.5 max-h-32 leading-relaxed"
           placeholder="Type a message... (Enter to send)"
           onChange={(e) => setMessage(e.target.value)}
           value={message}

@@ -98,11 +98,16 @@ export const GoogleUserLogin = async (req, res, next) => {
 
     let existingUser = await User.findOne({ email });
     const salt = await bcrypt.genSalt(10);
+     const photo = {
+      url: imageUrl,
+      publicId: null,
+    };
 
     if (existingUser && existingUser.loginType) {
       if (existingUser.loginType === "normal_user") {
         existingUser.loginType = "hybrid_user";
         existingUser.google_id = await bcrypt.hash(id, salt);
+        existingUser.photo = photo;
         await existingUser.save();
       } else {
         const isVerified = await bcrypt.compare(id, existingUser.google_id);
@@ -114,10 +119,7 @@ export const GoogleUserLogin = async (req, res, next) => {
       }
     } else {
       const hashGoogleID = await bcrypt.hash(id, salt);
-       const photo = {
-      url: imageUrl,
-      publicId: null,
-    };
+      
 
       const newUser = await User.create({
         fullName: name,

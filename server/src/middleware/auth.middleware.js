@@ -5,7 +5,7 @@ export const Protect = async (req, res, next) => {
   try {
 
     const token = req.cookies.token;
-    console.log(token);
+    // console.log(token);
     
     if (!token) {
       const error = new Error("Unauthorized");
@@ -14,7 +14,7 @@ export const Protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("decoded",decoded);
+    // console.log("decoded",decoded);
     
 
     const verifiedUser = await User.findById(decoded._id).select("-password");

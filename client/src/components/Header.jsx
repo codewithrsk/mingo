@@ -165,7 +165,7 @@ const Header = () => {
         left-0
         right-0
         z-50
-        h-[9vh]
+        h-[7vh]
         min-h-16
         border-b
         border-base-content/10
@@ -174,7 +174,7 @@ const Header = () => {
       "
     >
       {/* Reduced X padding */}
-      <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4 h-full">
+      <div className="w-full max-w-350 mx-auto px-2 sm:px-4 h-full">
         <div className="flex items-center justify-between h-full">
           {/* =====================================================
               LOGO
@@ -357,7 +357,7 @@ const Header = () => {
                     absolute
                     right-0
                     top-11
-                    z-[100]
+                    z-100
                     w-56
                     max-h-80
                     overflow-y-auto
