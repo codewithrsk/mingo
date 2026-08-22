@@ -29,7 +29,7 @@ const themes = [
 const Header = () => {
   const navigate = useNavigate();
 
-  const { isLogin, user, logout, setIsLogin, setUser, setRole } = useAuth();
+  const { isLogin, user, setIsLogin, setUser, setRole } = useAuth();
 
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [themeOpen, setThemeOpen] = React.useState(false);
@@ -438,29 +438,23 @@ const Header = () => {
                 >
                   {/* Avatar */}
 
-                  <div
-                    className="
-                      w-8
-                      h-8
-                      rounded-full
-                      bg-primary
-                      text-primary-content
-                      flex
-                      items-center
-                      justify-center
-                      font-bold
-                      text-xs
-                      uppercase
-                      shrink-0
-                    "
-                  >
-                    {userInitials}
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-content    flex    items-center    justify-center    font-bold    text-xs    uppercase    shrink-0    overflow-hidden  ">
+                    {user?.photo?.url ? (
+                      <img
+                        src={user.photo.url}
+                        alt={user.fullName || "User"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      userInitials
+                    )}
                   </div>
-
                   {/* User Details */}
 
                   <div className="text-left max-w-28">
-                    <p className="font-semibold text-sm truncate">{userName}</p>
+                    <p className="font-semibold text-sm truncate">
+                      {user.fullName}
+                    </p>
 
                     {userEmail && (
                       <p className="text-[10px] opacity-60 truncate">
@@ -754,7 +748,7 @@ const Header = () => {
                     </div>
 
                     <div className="text-left flex-1 min-w-0">
-                      <p className="font-semibold truncate">{userName}</p>
+                      <p className="font-semibold truncate">{user.fullName}</p>
 
                       {userEmail && (
                         <p className="text-sm opacity-60 truncate">

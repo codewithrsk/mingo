@@ -16,7 +16,7 @@ const App = () => {
   return (
     <div>
       <Toaster />
-      {path === "/" && <Header /> }
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />

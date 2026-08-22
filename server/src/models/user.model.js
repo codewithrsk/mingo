@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const UserSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
@@ -11,20 +11,18 @@ const UserSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-    phone: {
+    mobileNumber: {
       type: String,
-      required: true,
-    },
-    dob: {
-      type: Date,
-      required: true,
-    },
-    gender: {
-      type: String,
-      required: true,
     },
     password: {
       type: String,
+    },
+    google_id: {
+      type: String,
+    },
+    loginType: {
+      type: String,
+      enum: ["normal_user", "google_user", "hybrid_user"],
       required: true,
     },
     photo: {
@@ -43,11 +41,8 @@ const UserSchema = mongoose.Schema(
       default: "user",
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-const User = mongoose.model("User", UserSchema);
-
+const User = mongoose.model("User", userSchema);
 export default User;

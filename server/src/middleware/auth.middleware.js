@@ -3,7 +3,10 @@ import User from "../models/user.model.js";
 
 export const Protect = async (req, res, next) => {
   try {
-    const token = req.cookies.pasta;
+
+    const token = req.cookies.token;
+    console.log(token);
+    
     if (!token) {
       const error = new Error("Unauthorized");
       error.statusCode = 401;
@@ -11,13 +14,13 @@ export const Protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // console.log("decoded",decoded);
+    console.log("decoded",decoded);
     
 
-    const verifiedUser = await User.findById(decoded.id).select("-password");
+    const verifiedUser = await User.findById(decoded._id).select("-password");
     if (!verifiedUser) {
       const error = new Error("Unauthorized");
-    //   console.log("not Verfide");
+      console.log("not Verfide");
 
       error.statusCode = 401;
       return next(error);
